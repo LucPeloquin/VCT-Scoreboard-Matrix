@@ -16,7 +16,7 @@ static_roi = {"x": 1275, "y": 89, "width": 645, "height": 248}
 
 # Fixed ROIs for Team 1, Team 2, and the two number detection areas
 team1_roi = {"x": 631, "y": 26, "width": 79, "height": 40}
-team2_roi = {"x": 1219, "y": 24, "width": 74, "height": 38}
+team2_roi = {"x": 1216, "y": 26, "width": 79, "height": 40}
 number1_roi = {"x": 791, "y": 1, "width": 886 - 791, "height": 66 - 1}
 number2_roi = {"x": 1030, "y": 3, "width": 1121 - 1030, "height": 69 - 3}
 
@@ -27,17 +27,17 @@ output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with 
 # Parameters
 capture_interval = 1  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = 1  # Run for 20 minutes
+duration_minutes = 1.5  # Run for 1 minute
+min_confidence = 0.8  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], gpu=True, verbose=False)
 
 # Detect Team 1 and Team 2 names from the first screenshot
 def detect_team_names(sct):
-    # Capture screenshot of the entire screen
     screen = sct.grab(sct.monitors[1])  # Use the first monitor
-    screen_image = np.array(screen)  # Convert raw mss screenshot to NumPy array
-    screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)  # Convert BGRA to BGR
+    screen_image = np.array(screen)
+    screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
 
     # Crop Team 1 and Team 2 areas
     team1_frame = screen_image[team1_roi["y"]:team1_roi["y"] + team1_roi["height"],
@@ -45,23 +45,22 @@ def detect_team_names(sct):
     team2_frame = screen_image[team2_roi["y"]:team2_roi["y"] + team2_roi["height"],
                                team2_roi["x"]:team2_roi["x"] + team2_roi["width"]]
 
-    # Perform OCR to detect team names
-    team1_results = reader.readtext(team1_frame)
-    team2_results = reader.readtext(team2_frame)
+    # Perform OCR
+    team1_results = reader.readtext(team1_frame, detail=0)
+    team2_results = reader.readtext(team2_frame, detail=0)
 
-    team1_name = team1_results[0][1].strip() if team1_results else "Unknown"
-    team2_name = team2_results[0][1].strip() if team2_results else "Unknown"
+    team1_name = team1_results[0].strip() if team1_results else "Unknown"
+    team2_name = team2_results[0].strip() if team2_results else "Unknown"
 
-    print(f"Detected Team 1 Name: {team1_name}")
-    print(f"Detected Team 2 Name: {team2_name}")
+    # print(f"Detected Team 1 Name: {team1_name}")
+    # print(f"Detected Team 2 Name: {team2_name}")
     return team1_name, team2_name
 
 # Detect numbers from the two number ROIs
 def detect_numbers(sct):
-    # Capture screenshot of the entire screen
-    screen = sct.grab(sct.monitors[1])  # Use the first monitor
-    screen_image = np.array(screen)  # Convert raw mss screenshot to NumPy array
-    screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)  # Convert BGRA to BGR
+    screen = sct.grab(sct.monitors[1])
+    screen_image = np.array(screen)
+    screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
 
     # Crop number areas
     number1_frame = screen_image[number1_roi["y"]:number1_roi["y"] + number1_roi["height"],
@@ -69,45 +68,56 @@ def detect_numbers(sct):
     number2_frame = screen_image[number2_roi["y"]:number2_roi["y"] + number2_roi["height"],
                                  number2_roi["x"]:number2_roi["x"] + number2_roi["width"]]
 
-    # Perform OCR to detect numbers
+    # Perform OCR
     number1_results = reader.readtext(number1_frame, detail=0)
     number2_results = reader.readtext(number2_frame, detail=0)
 
-    # Extract and convert numbers
+    # Extract numbers
     try:
         number1 = int(number1_results[0].strip()) if number1_results else 0
         number2 = int(number2_results[0].strip()) if number2_results else 0
     except ValueError:
-        number1, number2 = 0, 0  # Default to 0 if OCR fails to detect valid integers
+        number1, number2 = 0, 0
+
 
     round_number = number1 + number2 + 1
     return number1, number2, round_number
 
 # Process desktop captures and detect text
-all_text_data = []  # Store all detected text
+all_text_data = []
 frame_count = 0
-end_time = datetime.now() + timedelta(minutes=duration_minutes)  # Calculate end time
+end_time = datetime.now() + timedelta(minutes=duration_minutes)
 
 with mss() as sct:
-    # Detect team names from the first capture
     team1_name, team2_name = detect_team_names(sct)
 
+    # Ensure both team names are detected before starting OCR processing
+    if team1_name == "Unknown" or team2_name == "Unknown":
+        print("Team names not detected. Aborting OCR processing.")
+        sys.exit(1)
+
+    print(f"Starting OCR processing with Team1: {team1_name} and Team2: {team2_name}")
+
     while datetime.now() < end_time:
-        # Detect numbers from the two ROIs
+        # Detect numbers from the number ROIs
         number1, number2, round_number = detect_numbers(sct)
 
-        # Capture screenshot of the static ROI
-        roi = {
-            "left": static_roi["x"],
-            "top": static_roi["y"],
-            "width": static_roi["width"],
-            "height": static_roi["height"],
-        }
-        screen = sct.grab(roi)
-        frame = np.array(screen)  # Convert raw mss screenshot to NumPy array
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)  # Convert BGRA to BGR
+        # Check if team names are still detectable before each capture
+        current_team1_name, current_team2_name = detect_team_names(sct)
+        if current_team1_name == "Unknown" or current_team2_name == "Unknown":
+            print("One or both team names are not detected. Skipping this frame.")
+            time.sleep(capture_interval)
+            continue
 
-        # Perform OCR on the static ROI
+        # print(f"Detected Numbers: Number 1 = {number1}, Number 2 = {number2}, Round = {round_number}")
+
+        # Define the static ROI for main text detection
+        roi = {"left": static_roi["x"], "top": static_roi["y"],
+               "width": static_roi["width"], "height": static_roi["height"]}
+        screen = sct.grab(roi)
+        frame = np.array(screen)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+
         results_static = reader.readtext(frame)
 
         # Group text into horizontal lines
@@ -133,51 +143,80 @@ with mss() as sct:
         # Sort lines top to bottom and text within each line left to right
         detected_text_lines = []
         for _, line in sorted(line_map.items()):
-            line = sorted(line, key=lambda item: item[0][0][0])  # Sort by X-coordinate
+            line = sorted(line, key=lambda item: item[0][0][0])
             detected_text_lines.append(" ".join([text[1] for text in line]))
 
-        # Save detected text
         for line in detected_text_lines:
             all_text_data.append([frame_count, number1, number2, round_number, line])
 
-        print(f"Frame {frame_count}: {detected_text_lines}")
         frame_count += 1
-
-        # Pause before capturing the next frame
         time.sleep(capture_interval)
 
-# Post-process to filter and split detected text
+# Save all detected text to CSV
+with open(output_csv_all, mode='w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(["Frame Number", "Number 1", "Number 2", "Round", "Player 1"])
+    writer.writerows(all_text_data)
+
+# Postprocess: Filter lines starting with team names
 filtered_text_data = []
-seen_lines = set()  # Track unique lines to remove duplicates
+seen_lines = set()
 
 for row in all_text_data:
     _, _, _, round_number, text_line = row
     words = text_line.split()
-    player1, player2 = "", ""
-    i = 0
-    while i < len(words):
-        if words[i] in (team1_name, team2_name):  # Detect team name
-            if not player1:
-                player1 = words[i]
-                if i + 1 < len(words):
-                    player1 += f" {words[i + 1]}"
-                    i += 1
-            elif not player2:
-                player2 = words[i]
-                if i + 1 < len(words):
-                    player2 += f" {words[i + 1]}"
-                    i += 1
-        i += 1
-    if player1 and player2:
-        processed_line = [round_number, player1, player2]
-        if tuple(processed_line) not in seen_lines:
-            filtered_text_data.append(processed_line)
-            seen_lines.add(tuple(processed_line))
+    if words and words[0] in (team1_name, team2_name):  # Check if the line starts with a team name
+        if text_line not in seen_lines:
+            filtered_text_data.append([round_number, text_line])
+            seen_lines.add(text_line)
 
 # Save filtered text to CSV
 with open(output_csv_filtered, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file, quoting=csv.QUOTE_MINIMAL)
-    writer.writerow(["Round", "Player 1", "Player 2"])  # Header
+    writer = csv.writer(file)
+    writer.writerow(["Round", "Player"])  # Header
     writer.writerows(filtered_text_data)
 
+# Add a "Player 2" column and process team detections
+def process_csv_with_team_split(csv_path, team1, team2):
+    with open(csv_path, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        rows = list(reader)
+
+    # Update header to include the "team2" column
+    if rows:
+        header = rows[0][:2] + ["Player 2"]  # Include "team2" in the header
+        updated_rows = [header]
+
+        # Process each row
+        for row in rows[1:]:
+            round_number, detected_text = row
+            words = detected_text.split()
+            player1, player2 = "", ""
+
+            i = 0
+            while i < len(words):
+                if words[i] in (team1, team2):  # Detect team name
+                    if not player1:
+                        player1 = words[i]
+                        if i + 1 < len(words):
+                            player1 += f" {words[i + 1]},"  # Add a comma after the next word
+                            i += 1
+                    elif not player2:
+                        player2 = words[i]
+                        if i + 1 < len(words):
+                            player2 += f" {words[i + 1]},"  # Add a comma after the next word
+                            i += 1
+                i += 1
+
+            # Add processed rows with no extra commas
+            updated_rows.append([round_number, player1.strip(","), player2.strip(",")])
+
+    # Write back to the same CSV
+    with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerows(updated_rows)
+
+# Call the function to split teams and update the CSV
+process_csv_with_team_split(output_csv_filtered, team1_name, team2_name)
+print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")
