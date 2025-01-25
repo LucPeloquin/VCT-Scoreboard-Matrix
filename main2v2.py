@@ -3,6 +3,7 @@ import easyocr
 import csv
 import sys
 import time
+import re
 from mss import mss
 import numpy as np
 from collections import defaultdict
@@ -26,13 +27,17 @@ output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
 
 # Parameters
-capture_interval = .8  # Time interval (in seconds) between captures
+capture_interval = 0.5  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = .5  # Run for 1 minute
-min_confidence = 0.8  # Minimum confidence for OCR
+duration_minutes = 1.5  # Run for 1.5 minutes
+min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], gpu=True, verbose=False)
+
+# Initialize time tracking
+last_detected_time = None
+time_countdown = 40
 
 # Detect Team 1 and Team 2 names from the first screenshot
 def detect_team_names(sct):
@@ -53,8 +58,6 @@ def detect_team_names(sct):
     team1_name = team1_results[0].strip() if team1_results else "Unknown"
     team2_name = team2_results[0].strip() if team2_results else "Unknown"
 
-    # print(f"Detected Team 1 Name: {team1_name}")
-    # print(f"Detected Team 2 Name: {team2_name}")
     return team1_name, team2_name
 
 # Detect numbers from the two number ROIs
@@ -85,6 +88,8 @@ def detect_numbers(sct):
 
 # Detect time from the time ROI
 def detect_time(sct):
+    global last_detected_time, time_countdown
+
     screen = sct.grab(sct.monitors[1])
     screen_image = np.array(screen)
     screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
@@ -96,9 +101,18 @@ def detect_time(sct):
     # Perform OCR
     time_results = reader.readtext(time_frame, detail=0)
 
-    # Extract detected time or default to "00:00"
-    detected_time = time_results[0].strip() if time_results else "00:00"
-    return detected_time
+    # Extract detected time or use countdown logic
+    if time_results:
+        detected_time = time_results[0].strip()
+        last_detected_time = detected_time  # Update last detected time
+        return detected_time
+    elif last_detected_time:
+        # If no time is detected, use the countdown
+        minutes, seconds = divmod(time_countdown, 60)
+        countdown_time = f"{minutes}:{seconds:02d}"
+        time_countdown = max(0, time_countdown - int(capture_interval))  # Decrease countdown
+        return countdown_time
+    return "00:00"  # Default if no time and no last detected time
 
 # Process desktop captures and detect text
 all_text_data = []
@@ -121,15 +135,6 @@ with mss() as sct:
 
         # Detect time from the time ROI
         detected_time = detect_time(sct)
-
-        # Check if team names are still detectable before each capture
-        current_team1_name, current_team2_name = detect_team_names(sct)
-        if current_team1_name == "Unknown" or current_team2_name == "Unknown":
-            print("One or both team names are not detected. Skipping this frame.")
-            time.sleep(capture_interval)
-            continue
-
-        # print(f"Detected Numbers: Number 1 = {number1}, Number 2 = {number2}, Round = {round_number}")
 
         # Define the static ROI for main text detection
         roi = {"left": static_roi["x"], "top": static_roi["y"],
@@ -178,7 +183,7 @@ with open(output_csv_all, mode='w', newline='', encoding='utf-8') as file:
     writer.writerow(["Frame Number", "Number 1", "Number 2", "Round", "Time", "Player 1"])
     writer.writerows(all_text_data)
 
-# Postprocess: Filter lines starting with team names
+# Post-process and save filtered text
 filtered_text_data = []
 seen_lines = set()
 
@@ -196,20 +201,29 @@ with open(output_csv_filtered, mode='w', newline='', encoding='utf-8') as file:
     writer.writerow(["Round", "Time", "Player"])  # Header
     writer.writerows(filtered_text_data)
 
-# Add a "Player 2" column and process team detections
 def process_csv_with_team_split(csv_path, team1, team2):
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         rows = list(reader)
 
-    # Update header to include the "team2" column
+    # Update header to include the "Player 2" column
     if rows:
-        header = rows[0][:3] + ["Player 2"]  # Include "team2" in the header
+        header = rows[0][:3] + ["Player 2"]  # Include "Player 2" in the header
         updated_rows = [header]
 
         # Process each row
-        for row in rows[2:]:
-            round_number, detected_text = row
+        for row in rows[1:]:  # Skip the header row
+            round_number, detected_time, detected_text = row
+
+            # Ensure the detected_time is in the format X:XX
+            detected_time = re.sub(r'[^\d]', '', detected_time)  # Remove non-numeric characters
+            if len(detected_time) == 4:  # Format as XX:XX
+                detected_time = f"{detected_time[:2]}:{detected_time[2:]}"
+            elif len(detected_time) == 3:  # Format as X:XX
+                detected_time = f"{detected_time[0]}:{detected_time[1:]}"
+            elif len(detected_time) == 2:  # Invalid case, set as default
+                detected_time = f"0:{detected_time}"
+
             words = detected_text.split()
             player1, player2 = "", ""
 
@@ -229,7 +243,7 @@ def process_csv_with_team_split(csv_path, team1, team2):
                 i += 1
 
             # Add processed rows with no extra commas
-            updated_rows.append([round_number, player1.strip(","), player2.strip(",")])
+            updated_rows.append([round_number, detected_time, player1.strip(","), player2.strip(",")])
 
     # Write back to the same CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
@@ -238,5 +252,6 @@ def process_csv_with_team_split(csv_path, team1, team2):
 
 # Call the function to split teams and update the CSV
 process_csv_with_team_split(output_csv_filtered, team1_name, team2_name)
+
 print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")

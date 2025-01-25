@@ -3,6 +3,7 @@ import easyocr
 import csv
 import sys
 import time
+import re
 from mss import mss
 import numpy as np
 from collections import defaultdict
@@ -26,10 +27,10 @@ output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
 
 # Parameters
-capture_interval = .8  # Time interval (in seconds) between captures
+capture_interval = .5  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = .5  # Run for 1 minute
-min_confidence = 0.8  # Minimum confidence for OCR
+duration_minutes = 1.5  # Run for 1 minute
+min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], gpu=True, verbose=False)
@@ -196,20 +197,29 @@ with open(output_csv_filtered, mode='w', newline='', encoding='utf-8') as file:
     writer.writerow(["Round", "Time", "Player"])  # Header
     writer.writerows(filtered_text_data)
 
-# Add a "Player 2" column and process team detections
 def process_csv_with_team_split(csv_path, team1, team2):
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         rows = list(reader)
 
-    # Update header to include the "team2" column
+    # Update header to include the "Player 2" column
     if rows:
-        header = rows[0][:3] + ["Player 2"]  # Include "team2" in the header
+        header = rows[0][:3] + ["Player 2"]  # Include "Player 2" in the header
         updated_rows = [header]
 
         # Process each row
-        for row in rows[2:]:
-            round_number, detected_text = row
+        for row in rows[1:]:  # Skip the header row
+            round_number, detected_time, detected_text = row
+
+            # Ensure the detected_time is in the format X:XX
+            detected_time = re.sub(r'[^\d]', '', detected_time)  # Remove non-numeric characters
+            if len(detected_time) == 4:  # Format as XX:XX
+                detected_time = f"{detected_time[:2]}:{detected_time[2:]}"
+            elif len(detected_time) == 3:  # Format as X:XX
+                detected_time = f"{detected_time[0]}:{detected_time[1:]}"
+            elif len(detected_time) == 2:  # Invalid case, set as default
+                detected_time = f"0:{detected_time}"
+
             words = detected_text.split()
             player1, player2 = "", ""
 
@@ -229,7 +239,7 @@ def process_csv_with_team_split(csv_path, team1, team2):
                 i += 1
 
             # Add processed rows with no extra commas
-            updated_rows.append([round_number, player1.strip(","), player2.strip(",")])
+            updated_rows.append([round_number, detected_time, player1.strip(","), player2.strip(",")])
 
     # Write back to the same CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:

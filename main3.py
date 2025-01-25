@@ -14,21 +14,21 @@ sys.stdout.reconfigure(encoding='utf-8')
 # Static ROI for main text detection
 static_roi = {"x": 1275, "y": 89, "width": 645, "height": 248}
 
-# ROIs for Team 1, Team 2, and the two number detection areas
+# Fixed ROIs for Team 1, Team 2, number detection, and time detection areas
 team1_roi = {"x": 631, "y": 26, "width": 79, "height": 40}
 team2_roi = {"x": 1216, "y": 26, "width": 79, "height": 40}
 number1_roi = {"x": 791, "y": 1, "width": 886 - 791, "height": 66 - 1}
 number2_roi = {"x": 1030, "y": 3, "width": 1121 - 1030, "height": 69 - 3}
-time_roi = {"x": 909, "y": 19, "width": 1009 - 909, "height": 74 - 19}
+time_roi = {"x": 909, "y": 19, "width": 1009 - 909, "height": 74 - 19}  # New time ROI
 
 # Paths
 output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
 
 # Parameters
-capture_interval = .8  # Time interval (in seconds) between captures
+capture_interval = 1  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = .5  # Run for 1 minute
+duration_minutes = 1  # Run for 1.5 minutes
 min_confidence = 0.8  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -53,8 +53,6 @@ def detect_team_names(sct):
     team1_name = team1_results[0].strip() if team1_results else "Unknown"
     team2_name = team2_results[0].strip() if team2_results else "Unknown"
 
-    # print(f"Detected Team 1 Name: {team1_name}")
-    # print(f"Detected Team 2 Name: {team2_name}")
     return team1_name, team2_name
 
 # Detect numbers from the two number ROIs
@@ -122,15 +120,6 @@ with mss() as sct:
         # Detect time from the time ROI
         detected_time = detect_time(sct)
 
-        # Check if team names are still detectable before each capture
-        current_team1_name, current_team2_name = detect_team_names(sct)
-        if current_team1_name == "Unknown" or current_team2_name == "Unknown":
-            print("One or both team names are not detected. Skipping this frame.")
-            time.sleep(capture_interval)
-            continue
-
-        # print(f"Detected Numbers: Number 1 = {number1}, Number 2 = {number2}, Round = {round_number}")
-
         # Define the static ROI for main text detection
         roi = {"left": static_roi["x"], "top": static_roi["y"],
                "width": static_roi["width"], "height": static_roi["height"]}
@@ -190,53 +179,10 @@ for row in all_text_data:
             filtered_text_data.append([round_number, detected_time, text_line])
             seen_lines.add(text_line)
 
-# Save filtered text to CSV
 with open(output_csv_filtered, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     writer.writerow(["Round", "Time", "Player"])  # Header
     writer.writerows(filtered_text_data)
 
-# Add a "Player 2" column and process team detections
-def process_csv_with_team_split(csv_path, team1, team2):
-    with open(csv_path, mode='r', encoding='utf-8') as file:
-        reader = csv.reader(file)
-        rows = list(reader)
-
-    # Update header to include the "team2" column
-    if rows:
-        header = rows[0][:3] + ["Player 2"]  # Include "team2" in the header
-        updated_rows = [header]
-
-        # Process each row
-        for row in rows[2:]:
-            round_number, detected_text = row
-            words = detected_text.split()
-            player1, player2 = "", ""
-
-            i = 0
-            while i < len(words):
-                if words[i] in (team1, team2):  # Detect team name
-                    if not player1:
-                        player1 = words[i]
-                        if i + 1 < len(words):
-                            player1 += f" {words[i + 1]},"  # Add a comma after the next word
-                            i += 1
-                    elif not player2:
-                        player2 = words[i]
-                        if i + 1 < len(words):
-                            player2 += f" {words[i + 1]},"  # Add a comma after the next word
-                            i += 1
-                i += 1
-
-            # Add processed rows with no extra commas
-            updated_rows.append([round_number, player1.strip(","), player2.strip(",")])
-
-    # Write back to the same CSV
-    with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
-        writer = csv.writer(file)
-        writer.writerows(updated_rows)
-
-# Call the function to split teams and update the CSV
-process_csv_with_team_split(output_csv_filtered, team1_name, team2_name)
 print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")

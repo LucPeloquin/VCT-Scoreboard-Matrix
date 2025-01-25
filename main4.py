@@ -14,21 +14,20 @@ sys.stdout.reconfigure(encoding='utf-8')
 # Static ROI for main text detection
 static_roi = {"x": 1275, "y": 89, "width": 645, "height": 248}
 
-# ROIs for Team 1, Team 2, and the two number detection areas
+# Fixed ROIs for Team 1, Team 2, and the two number detection areas
 team1_roi = {"x": 631, "y": 26, "width": 79, "height": 40}
 team2_roi = {"x": 1216, "y": 26, "width": 79, "height": 40}
 number1_roi = {"x": 791, "y": 1, "width": 886 - 791, "height": 66 - 1}
 number2_roi = {"x": 1030, "y": 3, "width": 1121 - 1030, "height": 69 - 3}
-time_roi = {"x": 909, "y": 19, "width": 1009 - 909, "height": 74 - 19}
 
 # Paths
 output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
 
 # Parameters
-capture_interval = .8  # Time interval (in seconds) between captures
+capture_interval = 1  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = .5  # Run for 1 minute
+duration_minutes = 1.5  # Run for 1 minute
 min_confidence = 0.8  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -80,25 +79,9 @@ def detect_numbers(sct):
     except ValueError:
         number1, number2 = 0, 0
 
+
     round_number = number1 + number2 + 1
     return number1, number2, round_number
-
-# Detect time from the time ROI
-def detect_time(sct):
-    screen = sct.grab(sct.monitors[1])
-    screen_image = np.array(screen)
-    screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
-
-    # Crop time area
-    time_frame = screen_image[time_roi["y"]:time_roi["y"] + time_roi["height"],
-                              time_roi["x"]:time_roi["x"] + time_roi["width"]]
-
-    # Perform OCR
-    time_results = reader.readtext(time_frame, detail=0)
-
-    # Extract detected time or default to "00:00"
-    detected_time = time_results[0].strip() if time_results else "00:00"
-    return detected_time
 
 # Process desktop captures and detect text
 all_text_data = []
@@ -118,9 +101,6 @@ with mss() as sct:
     while datetime.now() < end_time:
         # Detect numbers from the number ROIs
         number1, number2, round_number = detect_numbers(sct)
-
-        # Detect time from the time ROI
-        detected_time = detect_time(sct)
 
         # Check if team names are still detectable before each capture
         current_team1_name, current_team2_name = detect_team_names(sct)
@@ -167,7 +147,7 @@ with mss() as sct:
             detected_text_lines.append(" ".join([text[1] for text in line]))
 
         for line in detected_text_lines:
-            all_text_data.append([frame_count, number1, number2, round_number, detected_time, line])
+            all_text_data.append([frame_count, number1, number2, round_number, line])
 
         frame_count += 1
         time.sleep(capture_interval)
@@ -175,7 +155,7 @@ with mss() as sct:
 # Save all detected text to CSV
 with open(output_csv_all, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    writer.writerow(["Frame Number", "Number 1", "Number 2", "Round", "Time", "Player 1"])
+    writer.writerow(["Frame Number", "Number 1", "Number 2", "Round", "Player 1"])
     writer.writerows(all_text_data)
 
 # Postprocess: Filter lines starting with team names
@@ -183,17 +163,17 @@ filtered_text_data = []
 seen_lines = set()
 
 for row in all_text_data:
-    _, _, _, round_number, detected_time, text_line = row
+    _, _, _, round_number, text_line = row
     words = text_line.split()
     if words and words[0] in (team1_name, team2_name):  # Check if the line starts with a team name
         if text_line not in seen_lines:
-            filtered_text_data.append([round_number, detected_time, text_line])
+            filtered_text_data.append([round_number, text_line])
             seen_lines.add(text_line)
 
 # Save filtered text to CSV
 with open(output_csv_filtered, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    writer.writerow(["Round", "Time", "Player"])  # Header
+    writer.writerow(["Round", "Player"])  # Header
     writer.writerows(filtered_text_data)
 
 # Add a "Player 2" column and process team detections
@@ -204,11 +184,11 @@ def process_csv_with_team_split(csv_path, team1, team2):
 
     # Update header to include the "team2" column
     if rows:
-        header = rows[0][:3] + ["Player 2"]  # Include "team2" in the header
+        header = rows[0][:2] + ["Player 2"]  # Include "team2" in the header
         updated_rows = [header]
 
         # Process each row
-        for row in rows[2:]:
+        for row in rows[1:]:
             round_number, detected_text = row
             words = detected_text.split()
             player1, player2 = "", ""
