@@ -5,6 +5,7 @@ import sys
 import time
 import re
 from mss import mss
+from fuzzywuzzy import fuzz
 import numpy as np
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -29,7 +30,7 @@ output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with 
 # Parameters
 capture_interval = 0.5  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = 1.5  # Run for 1.5 minutes
+duration_minutes = 1  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -250,8 +251,55 @@ def process_csv_with_team_split(csv_path, team1, team2):
         writer = csv.writer(file)
         writer.writerows(updated_rows)
 
+def remove_duplicates(csv_path):
+
+    seen = set()
+    unique_rows = []
+
+    with open(csv_path, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
+        header = next(reader)  # Read the header row
+        unique_rows.append(header)  # Add the header to the unique rows
+
+        for row in reader:
+            round_number, detected_time, player, player2 = row
+
+            # Create a unique key based on Round, Player, and Player 2
+            unique_key = (round_number, player, player2)
+
+            # Check if a similar key already exists in the seen set
+            is_duplicate = False
+            for existing_key in seen:
+                existing_round, existing_player, existing_player2 = existing_key
+
+                # Check if the round matches
+                if round_number != existing_round:
+                    continue
+
+                # Check if Player (Team 1) is similar (within 2 characters difference)
+                player_similarity = fuzz.ratio(player, existing_player)
+
+                # Check if Player 2 (Team 2) is similar (within 3 characters difference)
+                player2_similarity = fuzz.ratio(player2, existing_player2)
+
+                # Apply different thresholds for Player and Player 2
+                if player_similarity >= 98 and player2_similarity >= 97:  # 98% for Player, 97% for Player 2
+                    is_duplicate = True
+                    break
+
+            # If the key is not a duplicate, add it to unique_rows and seen
+            if not is_duplicate:
+                seen.add(unique_key)
+                unique_rows.append(row)
+
+    # Write the unique rows back to the CSV
+    with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerows(unique_rows)
 # Call the function to split teams and update the CSV
 process_csv_with_team_split(output_csv_filtered, team1_name, team2_name)
+
+remove_duplicates(output_csv_filtered)
 
 print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")
