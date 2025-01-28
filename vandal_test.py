@@ -14,23 +14,23 @@ from fuzzywuzzy import fuzz
 sys.stdout.reconfigure(encoding='utf-8')
 
 # Static ROI for main text detection
-static_roi = {"x": 1275, "y": 89, "width": 645, "height": 248}
+static_roi = {"left": 1275, "top": 89, "width": 645, "height": 248}
 
 # ROIs for Team 1, Team 2, and the two number detection areas
-team1_roi = {"x": 631, "y": 26, "width": 79, "height": 40}
-team2_roi = {"x": 1216, "y": 26, "width": 79, "height": 40}
-number1_roi = {"x": 791, "y": 1, "width": 886 - 791, "height": 66 - 1}
-number2_roi = {"x": 1030, "y": 3, "width": 1121 - 1030, "height": 69 - 3}
-time_roi = {"x": 909, "y": 19, "width": 1009 - 909, "height": 74 - 19}
+team1_roi = {"left": 631, "top": 26, "width": 79, "height": 40}
+team2_roi = {"left": 1216, "top": 26, "width": 79, "height": 40}
+number1_roi = {"left": 791, "top": 1, "width": 886 - 791, "height": 66 - 1}
+number2_roi = {"left": 1030, "top": 3, "width": 1121 - 1030, "height": 69 - 3}
+time_roi = {"left": 909, "top": 19, "width": 1009 - 909, "height": 74 - 19}
 
 # Paths
 output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
 
 # Parameters
-capture_interval = 0.5  # Time interval (in seconds) between captures
+capture_interval = 0.2  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = 1.5  # Run for 1.5 minutes
+duration_minutes = .5  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -41,12 +41,12 @@ last_detected_time = None
 time_countdown = 40
 
 # Function to detect an image within the static ROI
-def detect_image_in_roi(sct, template_path, threshold=0.8):
+def detect_image_in_roi(sct, template_path, threshold=0.7):
     """
-    Detect if a template image exists within the static ROI.
+    Detect if a template image exists within the static ROI at any scale.
     :param sct: MSS screenshot object
     :param template_path: Path to the template image
-    :param threshold: Confidence threshold for detection (default: 0.8)
+    :param threshold: Confidence threshold for detection (default: 0.7)
     :return: Tuple of (found, location, confidence) where:
              - found: True if the template is detected, False otherwise
              - location: (x, y) coordinates of the detected template
@@ -63,15 +63,31 @@ def detect_image_in_roi(sct, template_path, threshold=0.8):
     screen_image = np.array(screen)
     screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2GRAY)
 
-    # Perform template matching
-    result = cv2.matchTemplate(screen_image, template, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv2.minMaxLoc(result)
+    # Use multi-scale template matching
+    found = False
+    best_confidence = 0
+    best_location = None
 
-    # Check if the confidence exceeds the threshold
-    if max_val >= threshold:
-        return True, max_loc, max_val
+    for scale in np.linspace(0.5, 1.5, 20):
+        resized_template = cv2.resize(template, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
+        if resized_template.shape[0] > screen_image.shape[0] or resized_template.shape[1] > screen_image.shape[1]:
+            break
+
+        result = cv2.matchTemplate(screen_image, resized_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+
+        if max_val > best_confidence:
+            best_confidence = max_val
+            best_location = max_loc
+
+        if max_val >= threshold:
+            found = True
+            break
+
+    if found:
+        return True, best_location, best_confidence
     else:
-        return False, None, max_val
+        return False, None, best_confidence
 
 # Detect Team 1 and Team 2 names from the first screenshot
 def detect_team_names(sct):
@@ -80,10 +96,10 @@ def detect_team_names(sct):
     screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
 
     # Crop Team 1 and Team 2 areas
-    team1_frame = screen_image[team1_roi["y"]:team1_roi["y"] + team1_roi["height"],
-                               team1_roi["x"]:team1_roi["x"] + team1_roi["width"]]
-    team2_frame = screen_image[team2_roi["y"]:team2_roi["y"] + team2_roi["height"],
-                               team2_roi["x"]:team2_roi["x"] + team2_roi["width"]]
+    team1_frame = screen_image[team1_roi["top"]:team1_roi["top"] + team1_roi["height"],
+                               team1_roi["left"]:team1_roi["left"] + team1_roi["width"]]
+    team2_frame = screen_image[team2_roi["top"]:team2_roi["top"] + team2_roi["height"],
+                               team2_roi["left"]:team2_roi["left"] + team2_roi["width"]]
 
     # Perform OCR
     team1_results = reader.readtext(team1_frame, detail=0)
@@ -101,10 +117,10 @@ def detect_numbers(sct):
     screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
 
     # Crop number areas
-    number1_frame = screen_image[number1_roi["y"]:number1_roi["y"] + number1_roi["height"],
-                                 number1_roi["x"]:number1_roi["x"] + number1_roi["width"]]
-    number2_frame = screen_image[number2_roi["y"]:number2_roi["y"] + number2_roi["height"],
-                                 number2_roi["x"]:number2_roi["x"] + number2_roi["width"]]
+    number1_frame = screen_image[number1_roi["top"]:number1_roi["top"] + number1_roi["height"],
+                                 number1_roi["left"]:number1_roi["left"] + number1_roi["width"]]
+    number2_frame = screen_image[number2_roi["top"]:number2_roi["top"] + number2_roi["height"],
+                                 number2_roi["left"]:number2_roi["left"] + number2_roi["width"]]
 
     # Perform OCR
     number1_results = reader.readtext(number1_frame, detail=0)
@@ -129,8 +145,8 @@ def detect_time(sct):
     screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
 
     # Crop time area
-    time_frame = screen_image[time_roi["y"]:time_roi["y"] + time_roi["height"],
-                              time_roi["x"]:time_roi["x"] + time_roi["width"]]
+    time_frame = screen_image[time_roi["top"]:time_roi["top"] + time_roi["height"],
+                              time_roi["left"]:time_roi["left"] + time_roi["width"]]
 
     # Perform OCR
     time_results = reader.readtext(time_frame, detail=0)
@@ -200,7 +216,7 @@ def process_csv_with_team_split(csv_path, team1, team2):
 
 # Remove duplicates based on Round, Player, and Player 2
 def remove_duplicates(csv_path):
-    seen = set()
+    seen = {}
     unique_rows = []
 
     with open(csv_path, mode='r', encoding='utf-8') as file:
@@ -211,39 +227,27 @@ def remove_duplicates(csv_path):
         for row in reader:
             round_number, detected_time, player, player2 = row
 
-            # Create a unique key based on Round, Player, and Player 2
-            unique_key = (round_number, player, player2)
+            # Create a similarity key for players
+            player_key = ''.join(sorted(player))  # Sort characters for fuzzy matching
 
-            # Check if a similar key already exists in the seen set
-            is_duplicate = False
-            for existing_key in seen:
-                existing_round, existing_player, existing_player2 = existing_key
-
-                # Check if the round matches
-                if round_number != existing_round:
-                    continue
-
-                # Check if Player (Team 1) is similar (within 2 characters difference)
-                player_similarity = fuzz.ratio(player, existing_player)
-
-                # Check if Player 2 (Team 2) is similar (within 3 characters difference)
-                player2_similarity = fuzz.ratio(player2, existing_player2)
-
-                # Apply different thresholds for Player and Player 2
-                if player_similarity >= 98 and player2_similarity >= 97:  # 98% for Player, 97% for Player 2
-                    is_duplicate = True
-                    break
-
-            # If the key is not a duplicate, add it to unique_rows and seen
-            if not is_duplicate:
-                seen.add(unique_key)
+            if player_key not in seen or fuzz.ratio(seen[player_key]["original"], player) < 98:
+                seen[player_key] = {"original": player, "time": detected_time}
                 unique_rows.append(row)
+
+            else:
+                # If the current player has an earlier time, replace the entry
+                existing_time = seen[player_key]["time"]
+                if detected_time < existing_time:
+                    seen[player_key] = {"original": player, "time": detected_time}
+                    unique_rows = [r for r in unique_rows if r != seen[player_key]["original"]]
+                    unique_rows.append(row)
 
     # Write the unique rows back to the CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerows(unique_rows)
 
+    print(f"Removed duplicates from {csv_path} by prioritizing earliest entries for similar players.")
     print(f"Removed duplicates from {csv_path} with leniency for 2 characters difference in Player and 3 in Player 2.")
 
 # Main processing loop
@@ -269,19 +273,29 @@ with mss() as sct:
         detected_time = detect_time(sct)
 
         # Detect image in the static ROI
-        template_path = "Vandal_icon.jpeg"  # Path to the template image
+        template_path = "Vandal_icon.png"  # Path to the template image
         found, location, confidence = detect_image_in_roi(sct, template_path)
         if found:
             print(f"Template detected at {location} with confidence {confidence:.2f}")
+            # Capture a screenshot of the ROI when the template is detected
+            detected_frame = sct.grab(static_roi)
+            detected_image = np.array(detected_frame)
+            cv2.imwrite(f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png", detected_image)
+            print("Screenshot saved for detected template.")
 
         # Define the static ROI for main text detection
-        roi = {"left": static_roi["x"], "top": static_roi["y"],
+        roi = {"left": static_roi["left"], "top": static_roi["top"],
                "width": static_roi["width"], "height": static_roi["height"]}
         screen = sct.grab(roi)
         frame = np.array(screen)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
 
         results_static = reader.readtext(frame)
+
+        # Output detected text within the static ROI to the console
+        # if results_static:
+        #     for _, text, _ in results_static:
+        #         print(f"Detected text in static ROI: {text}")
 
         # Group text into horizontal lines
         line_map = defaultdict(list)
@@ -336,7 +350,7 @@ for row in all_text_data:
 # Save filtered text to CSV
 with open(output_csv_filtered, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    writer.writerow(["Round", "Time", "Player"])  # Header
+    writer.writerow(["Round", "Time", "Player 1"])  # Header
     writer.writerows(filtered_text_data)
 
 # Call the function to split teams and update the CSV
