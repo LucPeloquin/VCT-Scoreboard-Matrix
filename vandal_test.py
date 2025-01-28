@@ -1,4 +1,5 @@
 import cv2
+import os
 import easyocr
 import csv
 import sys
@@ -68,7 +69,7 @@ def detect_image_in_roi(sct, template_path, threshold=0.7):
     best_confidence = 0
     best_location = None
 
-    for scale in np.linspace(0.5, 1.5, 20):
+    for scale in [81 / template.shape[1]]:
         resized_template = cv2.resize(template, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
         if resized_template.shape[0] > screen_image.shape[0] or resized_template.shape[1] > screen_image.shape[1]:
             break
@@ -255,6 +256,12 @@ all_text_data = []
 frame_count = 0
 end_time = datetime.now() + timedelta(minutes=duration_minutes)
 
+if os.path.exists('detected_screenshots'):
+    for file in os.listdir('detected_screenshots'):
+        os.remove(os.path.join('detected_screenshots', file))
+else:
+    os.makedirs('detected_screenshots')
+
 with mss() as sct:
     team1_name, team2_name = detect_team_names(sct)
 
@@ -280,7 +287,9 @@ with mss() as sct:
             # Capture a screenshot of the ROI when the template is detected
             detected_frame = sct.grab(static_roi)
             detected_image = np.array(detected_frame)
-            cv2.imwrite(f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png", detected_image)
+            screenshot_path = os.path.join('detected_screenshots', f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            cv2.imwrite(screenshot_path, detected_image)
+            print(f"Screenshot saved for detected template: {screenshot_path}")
             print("Screenshot saved for detected template.")
 
         # Define the static ROI for main text detection
