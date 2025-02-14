@@ -10,7 +10,6 @@ from mss import mss
 import numpy as np
 from collections import defaultdict
 from datetime import datetime, timedelta
-from fuzzywuzzy import fuzz
 
 # Set UTF-8 encoding for console
 sys.stdout.reconfigure(encoding='utf-8')
@@ -32,7 +31,7 @@ output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with 
 # Parameters
 capture_interval = 0.05  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = 2  # Run for 1.5 minutes
+duration_minutes = .5  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -150,50 +149,45 @@ def detect_time(sct):
         return countdown_time
     return "00:00"  # Default if no time and no last detected time
 
-# Function to split team names into Player and Player 2 columns
 def process_csv_with_team_split(csv_path, team1, team2):
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         rows = list(reader)
 
-    # Update header to include the "Player 2" column
     if rows:
-        header = rows[0][:3] + ["Player 2"]  # Include "Player 2" in the header
+        header = rows[0][:3] + ["Player 2"]
         updated_rows = [header]
 
-        # Process each row
-        for row in rows[1:]:  # Skip the header row
+        for row in rows[1:]:
             round_number, detected_time, detected_text = row
 
-            # Ensure the detected_time is in the format X:XX
-            detected_time = re.sub(r'[^\d]', '', detected_time)  # Remove non-numeric characters
-            if len(detected_time) == 4:  # Format as XX:XX
+            # Format detected_time
+            detected_time = re.sub(r'[^\d]', '', detected_time)
+            if len(detected_time) == 4:
                 detected_time = f"{detected_time[:2]}:{detected_time[2:]}"
-            elif len(detected_time) == 3:  # Format as X:XX
+            elif len(detected_time) == 3:
                 detected_time = f"{detected_time[0]}:{detected_time[1:]}"
-            elif len(detected_time) == 2:  # Invalid case, set as default
+            elif len(detected_time) == 2:
                 detected_time = f"0:{detected_time}"
 
             words = detected_text.split()
             player1, player2 = "", ""
 
-            i = 0
-            while i < len(words):
-                if words[i] in (team1, team2):  # Detect team name
+            # Look for team names and following words
+            for i in range(len(words) - 1):
+                if words[i] == team1:
                     if not player1:
-                        player1 = words[i]
-                        if i + 1 < len(words):
-                            player1 += f" {words[i + 1]},"  # Add a comma after the next word
-                            i += 1
+                        player1 = f"{team1} {words[i+1]}"
                     elif not player2:
-                        player2 = words[i]
-                        if i + 1 < len(words):
-                            player2 += f" {words[i + 1]},"  # Add a comma after the next word
-                            i += 1
-                i += 1
+                        player2 = f"{team1} {words[i+1]}"
+                elif words[i] == team2:
+                    if not player1:
+                        player1 = f"{team2} {words[i+1]}"
+                    elif not player2:
+                        player2 = f"{team2} {words[i+1]}"
 
-            # Add processed rows with no extra commas
-            updated_rows.append([round_number, detected_time, player1.strip(","), player2.strip(",")])
+            if player1 or player2:  # Only add rows where players were found
+                updated_rows.append([round_number, detected_time, player1, player2])
 
     # Write back to the same CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
@@ -315,7 +309,7 @@ with mss() as sct:
         # Sort lines top to bottom and text within each line left to right
         detected_text_lines = []
         for _, line in sorted(line_map.items()):
-            line = sorted(line, key=lambda item: item[0][0][0])
+            line = sorted(line, key=lambda item: item[0][0])
             detected_text_lines.append(" ".join([text[1] for text in line]))
 
         for line in detected_text_lines:
@@ -369,49 +363,3 @@ df.to_csv(output_csv_filtered, index=False)
 print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")
 
-def correct_spelling_errors(csv_path):
-    df = pd.read_csv(csv_path)
-    
-    # Get all unique player names from both columns
-    all_players = pd.concat([df['Player 1'], df['Player 2']]).unique()
-    
-    # Count occurrences of each name
-    name_counts = {}
-    for name in all_players:
-        if pd.notna(name):  # Skip NaN values
-            name_lower = name.lower()
-            if name_lower in name_counts:
-                name_counts[name_lower]['count'] += 1
-                name_counts[name_lower]['original'] = name  # Keep most frequent spelling
-            else:
-                name_counts[name_lower] = {'count': 1, 'original': name}
-    
-    # Find and correct similar names
-    corrections = {}
-    processed = set()
-    
-    for name1 in name_counts:
-        if name1 in processed:
-            continue
-            
-        for name2 in name_counts:
-            if name1 != name2 and name2 not in processed:
-                # Compare names using Levenshtein distance
-                if fuzz.ratio(name1, name2) >= 80:  # 80% similarity threshold
-                    # Keep the name that appears more frequently
-                    if name_counts[name1]['count'] >= name_counts[name2]['count']:
-                        corrections[name_counts[name2]['original']] = name_counts[name1]['original']
-                    else:
-                        corrections[name_counts[name1]['original']] = name_counts[name2]['original']
-                    processed.add(name1)
-                    processed.add(name2)
-    
-    # Apply corrections
-    df['Player 1'] = df['Player 1'].replace(corrections)
-    df['Player 2'] = df['Player 2'].replace(corrections)
-    
-    # Save corrected data
-    df.to_csv(csv_path, index=False)
-
-# Add this line after the previous post-processing steps
-correct_spelling_errors(output_csv_filtered)
