@@ -5,6 +5,7 @@ import csv
 import sys
 import time
 import re
+import pandas as pd
 from mss import mss
 import numpy as np
 from collections import defaultdict
@@ -29,66 +30,50 @@ output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
 
 # Parameters
-capture_interval = 0.2  # Time interval (in seconds) between captures
+capture_interval = 0.05  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = .5  # Run for 1.5 minutes
+duration_minutes = 2  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], gpu=True, verbose=False)
+
+# Get list of icon templates from icons folder
+icon_templates = [os.path.join("icons", f) for f in os.listdir("icons") if f.endswith(('.png', '.jpg', '.jpeg'))]
+print(f"Loaded {len(icon_templates)} icon templates: {icon_templates}")
 
 # Initialize time tracking
 last_detected_time = None
 time_countdown = 40
 
 # Function to detect an image within the static ROI
-def detect_image_in_roi(sct, template_path, threshold=0.7):
+def detect_image_in_roi(sct, template_paths, threshold=0.7):
     """
-    Detect if a template image exists within the static ROI at any scale.
-    :param sct: MSS screenshot object
-    :param template_path: Path to the template image
-    :param threshold: Confidence threshold for detection (default: 0.7)
-    :return: Tuple of (found, location, confidence) where:
-             - found: True if the template is detected, False otherwise
-             - location: (x, y) coordinates of the detected template
-             - confidence: Confidence score of the detection
+    Detect if any template images exist within the static ROI at any scale.
     """
-    # Load the template image
-    template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
-    if template is None:
-        print(f"Error: Template image not found at {template_path}")
-        return False, None, 0
-
-    # Capture the screen within the static ROI
+    detections = []
+    
+    # Only capture the static ROI
     screen = sct.grab(static_roi)
     screen_image = np.array(screen)
     screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2GRAY)
 
-    # Use multi-scale template matching
-    found = False
-    best_confidence = 0
-    best_location = None
+    for template_path in template_paths:
+        if not template_path.startswith("icons/"):
+            continue
+            
+        template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
+        if template is None:
+            continue
 
-    for scale in [81 / template.shape[1]]:
-        resized_template = cv2.resize(template, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
-        if resized_template.shape[0] > screen_image.shape[0] or resized_template.shape[1] > screen_image.shape[1]:
-            break
-
-        result = cv2.matchTemplate(screen_image, resized_template, cv2.TM_CCOEFF_NORMED)
+        result = cv2.matchTemplate(screen_image, template, cv2.TM_CCOEFF_NORMED)
         _, max_val, _, max_loc = cv2.minMaxLoc(result)
 
-        if max_val > best_confidence:
-            best_confidence = max_val
-            best_location = max_loc
-
         if max_val >= threshold:
-            found = True
-            break
+            template_name = os.path.basename(template_path)
+            detections.append((template_name, max_loc, max_val))
 
-    if found:
-        return True, best_location, best_confidence
-    else:
-        return False, None, best_confidence
+    return detections
 
 # Detect Team 1 and Team 2 names from the first screenshot
 def detect_team_names(sct):
@@ -226,30 +211,34 @@ def remove_duplicates(csv_path):
         unique_rows.append(header)  # Add the header to the unique rows
 
         for row in reader:
-            round_number, detected_time, player, player2 = row
+            round_number, detected_time, player1, player2 = row
+            
+            # Create a case-insensitive key combining round and both players
+            # Sort players to ensure "A kills B" and "B kills A" are treated as duplicates
+            players = sorted([player1.lower(), player2.lower()])
+            key = (round_number, tuple(players))
 
-            # Create a similarity key for players
-            player_key = ''.join(sorted(player))  # Sort characters for fuzzy matching
+            # If we haven't seen this combination or if this entry has an earlier time
+            if key not in seen or detected_time < seen[key]["time"]:
+                seen[key] = {
+                    "time": detected_time,
+                    "row": row
+                }
 
-            if player_key not in seen or fuzz.ratio(seen[player_key]["original"], player) < 98:
-                seen[player_key] = {"original": player, "time": detected_time}
-                unique_rows.append(row)
+    # Collect all unique rows, keeping only the earliest occurrence
+    unique_rows.extend(seen[key]["row"] for key in seen)
 
-            else:
-                # If the current player has an earlier time, replace the entry
-                existing_time = seen[player_key]["time"]
-                if detected_time < existing_time:
-                    seen[player_key] = {"original": player, "time": detected_time}
-                    unique_rows = [r for r in unique_rows if r != seen[player_key]["original"]]
-                    unique_rows.append(row)
+    # Sort by round number and time
+    data_rows = unique_rows[1:]  # Exclude header
+    data_rows.sort(key=lambda x: (int(x[0]), x[1]))  # Sort by round number, then time
+    unique_rows = [header] + data_rows
 
     # Write the unique rows back to the CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerows(unique_rows)
 
-    print(f"Removed duplicates from {csv_path} by prioritizing earliest entries for similar players.")
-    print(f"Removed duplicates from {csv_path} with leniency for 2 characters difference in Player and 3 in Player 2.")
+    print(f"Removed duplicates from {csv_path} by keeping earliest entries per round and player combination.")
 
 # Main processing loop
 all_text_data = []
@@ -279,18 +268,15 @@ with mss() as sct:
         # Detect time from the time ROI
         detected_time = detect_time(sct)
 
-        # Detect image in the static ROI
-        template_path = "Vandal_icon.png"  # Path to the template image
-        found, location, confidence = detect_image_in_roi(sct, template_path)
-        if found:
-            print(f"Template detected at {location} with confidence {confidence:.2f}")
-            # Capture a screenshot of the ROI when the template is detected
-            detected_frame = sct.grab(static_roi)
-            detected_image = np.array(detected_frame)
-            screenshot_path = os.path.join('detected_screenshots', f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-            cv2.imwrite(screenshot_path, detected_image)
-            print(f"Screenshot saved for detected template: {screenshot_path}")
-            print("Screenshot saved for detected template.")
+        # Detect images in the static ROI
+        detections = detect_image_in_roi(sct, icon_templates)
+        if detections:
+            for template_name, location, confidence in detections:
+                print(f"Template {template_name} detected in static ROI at {location} with confidence {confidence:.2f}")
+                detected_frame = sct.grab(static_roi)
+                detected_image = np.array(detected_frame)
+                screenshot_path = os.path.join('detected_screenshots', f"detected_{template_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+                cv2.imwrite(screenshot_path, detected_image)
 
         # Define the static ROI for main text detection
         roi = {"left": static_roi["left"], "top": static_roi["top"],
@@ -368,5 +354,64 @@ process_csv_with_team_split(output_csv_filtered, team1_name, team2_name)
 # Remove duplicates based on Round, Player, and Player 2
 remove_duplicates(output_csv_filtered)
 
+def convert_time_to_seconds(time_str):
+    minutes, seconds = map(int, time_str.split(':'))
+    return minutes * 60 + seconds
+
+df = pd.read_csv(output_csv_filtered)
+df['TimeSeconds'] = df['Time'].apply(convert_time_to_seconds)
+df = df.sort_values(['Round', 'TimeSeconds'], ascending=[True, False])
+df = df.drop('TimeSeconds', axis=1)
+
+# Save the sorted DataFrame back to CSV
+df.to_csv(output_csv_filtered, index=False)
+
 print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")
+
+def correct_spelling_errors(csv_path):
+    df = pd.read_csv(csv_path)
+    
+    # Get all unique player names from both columns
+    all_players = pd.concat([df['Player 1'], df['Player 2']]).unique()
+    
+    # Count occurrences of each name
+    name_counts = {}
+    for name in all_players:
+        if pd.notna(name):  # Skip NaN values
+            name_lower = name.lower()
+            if name_lower in name_counts:
+                name_counts[name_lower]['count'] += 1
+                name_counts[name_lower]['original'] = name  # Keep most frequent spelling
+            else:
+                name_counts[name_lower] = {'count': 1, 'original': name}
+    
+    # Find and correct similar names
+    corrections = {}
+    processed = set()
+    
+    for name1 in name_counts:
+        if name1 in processed:
+            continue
+            
+        for name2 in name_counts:
+            if name1 != name2 and name2 not in processed:
+                # Compare names using Levenshtein distance
+                if fuzz.ratio(name1, name2) >= 80:  # 80% similarity threshold
+                    # Keep the name that appears more frequently
+                    if name_counts[name1]['count'] >= name_counts[name2]['count']:
+                        corrections[name_counts[name2]['original']] = name_counts[name1]['original']
+                    else:
+                        corrections[name_counts[name1]['original']] = name_counts[name2]['original']
+                    processed.add(name1)
+                    processed.add(name2)
+    
+    # Apply corrections
+    df['Player 1'] = df['Player 1'].replace(corrections)
+    df['Player 2'] = df['Player 2'].replace(corrections)
+    
+    # Save corrected data
+    df.to_csv(csv_path, index=False)
+
+# Add this line after the previous post-processing steps
+correct_spelling_errors(output_csv_filtered)
