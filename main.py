@@ -31,7 +31,7 @@ output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with 
 # Parameters
 capture_interval = 0.05  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = .5  # Run for 1.5 minutes
+duration_minutes = 2  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -362,4 +362,64 @@ df.to_csv(output_csv_filtered, index=False)
 
 print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")
+
+def validate_and_correct_against_roster(csv_path):
+    # First, create a copy of the original file
+    pre_validation_path = csv_path.replace('.csv', '_pre_validation.csv')
+    df = pd.read_csv(csv_path)
+    df.to_csv(pre_validation_path, index=False)
+    
+    # Load team rosters
+    rosters = {}
+    valid_combinations = []
+    with open('team_rosters.csv', 'r', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip header
+        for row in reader:
+            team = row[0]
+            # Store the original case combinations
+            players = [f"{team} {p.strip()}" for p in row[1:6] if p.strip()]
+            valid_combinations.extend(players)
+            # Store lowercase for matching
+            rosters[team] = [p.lower() for p in players]
+    
+    def find_closest_match(player_name):
+        if pd.isna(player_name) or player_name == '':
+            return player_name
+            
+        player_lower = player_name.lower()
+        best_match = None
+        min_distance = float('inf')
+        
+        # Check against all valid combinations
+        for valid_name in valid_combinations:
+            valid_lower = valid_name.lower()
+            # Calculate Levenshtein distance
+            distance = sum(1 for a, b in zip(player_lower, valid_lower) if a != b)
+            distance += abs(len(player_lower) - len(valid_lower))
+            
+            # Update if this is the best match within margin of error
+            if distance <= 3 and distance < min_distance:
+                min_distance = distance
+                best_match = valid_name
+        
+        return best_match if best_match else player_name
+
+    # Correct player names
+    df['Player 1'] = df['Player 1'].apply(find_closest_match)
+    df['Player 2'] = df['Player 2'].apply(find_closest_match)
+    
+    # Save corrected data to a new file
+    post_validation_path = csv_path.replace('.csv', '_validated.csv')
+    df.to_csv(post_validation_path, index=False)
+    
+    # Also update the original file
+    df.to_csv(csv_path, index=False)
+    
+    print(f"Pre-validation data saved to: {pre_validation_path}")
+    print(f"Post-validation data saved to: {post_validation_path}")
+    print(f"Original file updated: {csv_path}")
+
+# Add this line after other post-processing steps
+validate_and_correct_against_roster(output_csv_filtered)
 

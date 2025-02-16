@@ -16,6 +16,10 @@ sys.stdout.reconfigure(encoding='utf-8')
 team1_roi = {"left": 8, "top": 540, "width": 399, "height": 534}
 team2_roi = {"left": 1518, "top": 546, "width": 397, "height": 525}
 
+# Add these ROIs for org detection
+org1_roi = {"left": 631, "top": 26, "width": 79, "height": 40}
+org2_roi = {"left": 1216, "top": 26, "width": 79, "height": 40}
+
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], gpu=True, verbose=False)
 
@@ -109,6 +113,22 @@ def find_team_players(frame, roi):
 
     return players[:5]  # Ensure we return exactly 5 or fewer players
 
+def detect_org_names(frame):
+    # Crop org name areas
+    org1_frame = frame[org1_roi["top"]:org1_roi["top"] + org1_roi["height"],
+                      org1_roi["left"]:org1_roi["left"] + org1_roi["width"]]
+    org2_frame = frame[org2_roi["top"]:org2_roi["top"] + org2_roi["height"],
+                      org2_roi["left"]:org2_roi["left"] + org2_roi["width"]]
+
+    # Perform OCR
+    org1_results = reader.readtext(org1_frame, detail=0)
+    org2_results = reader.readtext(org2_frame, detail=0)
+
+    org1_name = org1_results[0].strip() if org1_results else "Team 1"
+    org2_name = org2_results[0].strip() if org2_results else "Team 2"
+
+    return org1_name, org2_name
+
 def main():
     output_file = 'team_rosters.csv'
     
@@ -116,6 +136,9 @@ def main():
     
     # Capture screen after 3-second delay
     frame = capture_screenshot()
+    
+    # Detect org names
+    org1_name, org2_name = detect_org_names(frame)
     
     # Find players for each team using their specific ROIs
     team1_players = find_team_players(frame, team1_roi)
@@ -125,12 +148,12 @@ def main():
     team1_players.extend([''] * (5 - len(team1_players)))
     team2_players.extend([''] * (5 - len(team2_players)))
 
-    # Write to CSV
+    # Write to CSV using detected org names
     with open(output_file, 'w', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
         writer.writerow(['Team', 'Player 1', 'Player 2', 'Player 3', 'Player 4', 'Player 5'])
-        writer.writerow(['Team 1'] + team1_players)
-        writer.writerow(['Team 2'] + team2_players)
+        writer.writerow([org1_name] + team1_players)
+        writer.writerow([org2_name] + team2_players)
 
     print(f"Team rosters saved to {output_file}")
 
