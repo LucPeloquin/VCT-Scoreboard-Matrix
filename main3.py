@@ -5,11 +5,11 @@ import csv
 import sys
 import time
 import re
-import pandas as pd
 from mss import mss
 import numpy as np
 from collections import defaultdict
 from datetime import datetime, timedelta
+from fuzzywuzzy import fuzz
 
 # Set UTF-8 encoding for console
 sys.stdout.reconfigure(encoding='utf-8')
@@ -29,7 +29,7 @@ output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
 
 # Parameters
-capture_interval = 0.05  # Time interval (in seconds) between captures
+capture_interval = 0.2  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
 duration_minutes = .5  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
@@ -37,104 +37,58 @@ min_confidence = 0.9  # Minimum confidence for OCR
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], gpu=True, verbose=False)
 
-# Get list of icon templates from icons folder
-icon_templates = [os.path.join("icons", f) for f in os.listdir("icons") if f.endswith(('.png', '.jpg', '.jpeg'))]
-print(f"Loaded {len(icon_templates)} icon templates: {icon_templates}")
-
 # Initialize time tracking
 last_detected_time = None
 time_countdown = 40
 
-# Add a dictionary to store detections per round
-detections_dict = {}
-
-def load_team_rosters():
-    """Load team rosters from CSV file and return a dictionary of team-player combinations."""
-    rosters = {}
-    with open('team_rosters.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)  # Skip header
-        for row in reader:
-            if row:  # Check if row is not empty
-                team = row[0].lower()
-                # Create full "Team Player" combinations for each valid player
-                players = [f"{row[0]} {p.strip()}" for p in row[1:6] if p.strip()]
-                rosters[team] = players
-    return rosters
-
 # Function to detect an image within the static ROI
-def detect_image_in_roi(sct, template_paths, round_number, threshold=0.7):
+def detect_image_in_roi(sct, template_path, threshold=0.7):
     """
-    Detect if Ghost_icon.png exists within the static ROI at any scale and associate it with nearby text.
+    Detect if a template image exists within the static ROI at any scale.
+    :param sct: MSS screenshot object
+    :param template_path: Path to the template image
+    :param threshold: Confidence threshold for detection (default: 0.7)
+    :return: Tuple of (found, location, confidence) where:
+             - found: True if the template is detected, False otherwise
+             - location: (x, y) coordinates of the detected template
+             - confidence: Confidence score of the detection
     """
-    detections = []
-    
-    # Capture the static ROI
-    screen = sct.grab(static_roi)
-    screen_image = np.array(screen)
-    screen_image_gray = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2GRAY)
-    screen_image_color = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2BGR)
-
-    # Get OCR results with bounding boxes
-    ocr_results = reader.readtext(screen_image_color)
-    
-    # Process Ghost_icon.png
-    template_path = "icons/Ghost_icon.png"
+    # Load the template image
     template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
     if template is None:
-        return detections
+        print(f"Error: Template image not found at {template_path}")
+        return False, None, 0
 
-    # Define scale range
-    scales = np.linspace(0.2, 2.0, 20)
+    # Capture the screen within the static ROI
+    screen = sct.grab(static_roi)
+    screen_image = np.array(screen)
+    screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2GRAY)
 
-    for scale in scales:
-        width = int(template.shape[1] * scale)
-        height = int(template.shape[0] * scale)
-        resized_template = cv2.resize(template, (width, height))
+    # Use multi-scale template matching
+    found = False
+    best_confidence = 0
+    best_location = None
 
-        if width > screen_image_gray.shape[1] or height > screen_image_gray.shape[0]:
-            continue
-
-        result = cv2.matchTemplate(screen_image_gray, resized_template, cv2.TM_CCOEFF_NORMED)
-        _, max_val, _, max_loc = cv2.minMaxLoc(result)
-
-        if max_val >= threshold:
-            template_name = "Ghost_icon.png"
-            
-            # Calculate the center y-coordinate of the detected template
-            template_center_y = max_loc[1] + (height // 2)
-            
-            # Find the closest text line to the template
-            closest_text = ""
-            min_distance = float('inf')
-            
-            for bbox, text, conf in ocr_results:
-                # Calculate center y-coordinate of the text bounding box
-                text_center_y = (bbox[0][1] + bbox[2][1]) // 2
-                
-                # Calculate vertical distance between template and text
-                distance = abs(template_center_y - text_center_y)
-                
-                # Update closest text if this is the nearest
-                if distance < min_distance and distance < 30:  # 30 pixels threshold
-                    min_distance = distance
-                    closest_text = text
-
-            # Store the detection with associated text
-            detections.append((template_name, max_loc, max_val))
-            # Store the detection and associated text for this round
-            detections_dict[str(round_number)] = {
-                'template': template_name,
-                'text': closest_text
-            }
-            
-            current_time = datetime.now().strftime('%H:%M:%S')
-            print(f"\n[{current_time}] Round {round_number}:")
-            print(f"Template detected: {template_name} (confidence: {max_val:.2f}, scale: {scale:.2f})")
-            print(f"Associated text: {closest_text}\n")
+    for scale in [81 / template.shape[1]]:
+        resized_template = cv2.resize(template, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
+        if resized_template.shape[0] > screen_image.shape[0] or resized_template.shape[1] > screen_image.shape[1]:
             break
 
-    return detections
+        result = cv2.matchTemplate(screen_image, resized_template, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(result)
+
+        if max_val > best_confidence:
+            best_confidence = max_val
+            best_location = max_loc
+
+        if max_val >= threshold:
+            found = True
+            break
+
+    if found:
+        return True, best_location, best_confidence
+    else:
+        return False, None, best_confidence
 
 # Detect Team 1 and Team 2 names from the first screenshot
 def detect_team_names(sct):
@@ -211,57 +165,50 @@ def detect_time(sct):
         return countdown_time
     return "00:00"  # Default if no time and no last detected time
 
+# Function to split team names into Player and Player 2 columns
 def process_csv_with_team_split(csv_path, team1, team2):
-    # Load the roster database with full "Team Player" combinations
-    valid_rosters = load_team_rosters()
-    team1_combinations = valid_rosters.get(team1.lower(), [])
-    team2_combinations = valid_rosters.get(team2.lower(), [])
-
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         rows = list(reader)
 
+    # Update header to include the "Player 2" column
     if rows:
-        # Add new column to header
-        header = rows[0][:3] + ["Player 2", "Template"]
+        header = rows[0][:3] + ["Player 2"]  # Include "Player 2" in the header
         updated_rows = [header]
 
-        for row in rows[1:]:
+        # Process each row
+        for row in rows[1:]:  # Skip the header row
             round_number, detected_time, detected_text = row
 
-            # Format detected_time
-            detected_time = re.sub(r'[^\d]', '', detected_time)
-            if len(detected_time) == 4:
+            # Ensure the detected_time is in the format X:XX
+            detected_time = re.sub(r'[^\d]', '', detected_time)  # Remove non-numeric characters
+            if len(detected_time) == 4:  # Format as XX:XX
                 detected_time = f"{detected_time[:2]}:{detected_time[2:]}"
-            elif len(detected_time) == 3:
+            elif len(detected_time) == 3:  # Format as X:XX
                 detected_time = f"{detected_time[0]}:{detected_time[1:]}"
-            elif len(detected_time) == 2:
+            elif len(detected_time) == 2:  # Invalid case, set as default
                 detected_time = f"0:{detected_time}"
 
             words = detected_text.split()
             player1, player2 = "", ""
 
-            # Look for team names and following words
-            for i in range(len(words) - 1):
-                if words[i] == team1:
+            i = 0
+            while i < len(words):
+                if words[i] in (team1, team2):  # Detect team name
                     if not player1:
-                        player1 = f"{team1} {words[i+1]}"
+                        player1 = words[i]
+                        if i + 1 < len(words):
+                            player1 += f" {words[i + 1]},"  # Add a comma after the next word
+                            i += 1
                     elif not player2:
-                        player2 = f"{team1} {words[i+1]}"
-                elif words[i] == team2:
-                    if not player1:
-                        player1 = f"{team2} {words[i+1]}"
-                    elif not player2:
-                        player2 = f"{team2} {words[i+1]}"
+                        player2 = words[i]
+                        if i + 1 < len(words):
+                            player2 += f" {words[i + 1]},"  # Add a comma after the next word
+                            i += 1
+                i += 1
 
-            # Get template name and associated text from detections dictionary
-            detection_info = detections_dict.get(str(round_number), {})
-            template_name = detection_info.get('template', '')
-            if template_name and template_name.endswith(('.png', '.jpg', '.jpeg')):
-                template_name = os.path.splitext(template_name)[0]  # Remove file extension
-
-            if player1 or player2:  # Only add rows where players were found
-                updated_rows.append([round_number, detected_time, player1, player2, template_name])
+            # Add processed rows with no extra commas
+            updated_rows.append([round_number, detected_time, player1.strip(","), player2.strip(",")])
 
     # Write back to the same CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
@@ -279,34 +226,30 @@ def remove_duplicates(csv_path):
         unique_rows.append(header)  # Add the header to the unique rows
 
         for row in reader:
-            round_number, detected_time, player1, player2, template = row  # Unpack all 5 columns
-            
-            # Create a case-insensitive key combining round and both players
-            # Sort players to ensure "A kills B" and "B kills A" are treated as duplicates
-            players = sorted([player1.lower(), player2.lower()])
-            key = (round_number, tuple(players))
+            round_number, detected_time, player, player2 = row
 
-            # If we haven't seen this combination or if this entry has an earlier time
-            if key not in seen or detected_time < seen[key]["time"]:
-                seen[key] = {
-                    "time": detected_time,
-                    "row": row
-                }
+            # Create a similarity key for players
+            player_key = ''.join(sorted(player))  # Sort characters for fuzzy matching
 
-    # Collect all unique rows, keeping only the earliest occurrence
-    unique_rows.extend(seen[key]["row"] for key in seen)
+            if player_key not in seen or fuzz.ratio(seen[player_key]["original"], player) < 98:
+                seen[player_key] = {"original": player, "time": detected_time}
+                unique_rows.append(row)
 
-    # Sort by round number and time
-    data_rows = unique_rows[1:]  # Exclude header
-    data_rows.sort(key=lambda x: (int(x[0]), x[1]))  # Sort by round number, then time
-    unique_rows = [header] + data_rows
+            else:
+                # If the current player has an earlier time, replace the entry
+                existing_time = seen[player_key]["time"]
+                if detected_time < existing_time:
+                    seen[player_key] = {"original": player, "time": detected_time}
+                    unique_rows = [r for r in unique_rows if r != seen[player_key]["original"]]
+                    unique_rows.append(row)
 
     # Write the unique rows back to the CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerows(unique_rows)
 
-    print(f"Removed duplicates from {csv_path} by keeping earliest entries per round and player combination.")
+    print(f"Removed duplicates from {csv_path} by prioritizing earliest entries for similar players.")
+    print(f"Removed duplicates from {csv_path} with leniency for 2 characters difference in Player and 3 in Player 2.")
 
 # Main processing loop
 all_text_data = []
@@ -336,15 +279,18 @@ with mss() as sct:
         # Detect time from the time ROI
         detected_time = detect_time(sct)
 
-        # Detect images in the static ROI
-        detections = detect_image_in_roi(sct, icon_templates, round_number)
-        if detections:
-            for template_name, location, confidence in detections:
-                print(f"Template {template_name} detected in static ROI at {location} with confidence {confidence:.2f}")
-                detected_frame = sct.grab(static_roi)
-                detected_image = np.array(detected_frame)
-                screenshot_path = os.path.join('detected_screenshots', f"detected_{template_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-                cv2.imwrite(screenshot_path, detected_image)
+        # Detect image in the static ROI
+        template_path = "Vandal_icon.png"  # Path to the template image
+        found, location, confidence = detect_image_in_roi(sct, template_path)
+        if found:
+            print(f"Template detected at {location} with confidence {confidence:.2f}")
+            # Capture a screenshot of the ROI when the template is detected
+            detected_frame = sct.grab(static_roi)
+            detected_image = np.array(detected_frame)
+            screenshot_path = os.path.join('detected_screenshots', f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            cv2.imwrite(screenshot_path, detected_image)
+            print(f"Screenshot saved for detected template: {screenshot_path}")
+            print("Screenshot saved for detected template.")
 
         # Define the static ROI for main text detection
         roi = {"left": static_roi["left"], "top": static_roi["top"],
@@ -383,7 +329,7 @@ with mss() as sct:
         # Sort lines top to bottom and text within each line left to right
         detected_text_lines = []
         for _, line in sorted(line_map.items()):
-            line = sorted(line, key=lambda item: item[0][0])
+            line = sorted(line, key=lambda item: item[0][0][0])
             detected_text_lines.append(" ".join([text[1] for text in line]))
 
         for line in detected_text_lines:
@@ -422,78 +368,5 @@ process_csv_with_team_split(output_csv_filtered, team1_name, team2_name)
 # Remove duplicates based on Round, Player, and Player 2
 remove_duplicates(output_csv_filtered)
 
-def convert_time_to_seconds(time_str):
-    minutes, seconds = map(int, time_str.split(':'))
-    return minutes * 60 + seconds
-
-df = pd.read_csv(output_csv_filtered)
-df['TimeSeconds'] = df['Time'].apply(convert_time_to_seconds)
-df = df.sort_values(['Round', 'TimeSeconds'], ascending=[True, False])
-df = df.drop('TimeSeconds', axis=1)
-
-# Save the sorted DataFrame back to CSV
-df.to_csv(output_csv_filtered, index=False)
-
 print(f"All detected text saved to {output_csv_all}")
 print(f"Filtered text saved to {output_csv_filtered}")
-
-def validate_and_correct_against_roster(csv_path):
-    # First, create a copy of the original file
-    pre_validation_path = csv_path.replace('.csv', '_pre_validation.csv')
-    df = pd.read_csv(csv_path)
-    df.to_csv(pre_validation_path, index=False)
-    
-    # Load team rosters
-    rosters = {}
-    valid_combinations = []
-    with open('team_rosters.csv', 'r', encoding='utf-8') as f:
-        reader = csv.reader(f)
-        next(reader)  # Skip header
-        for row in reader:
-            team = row[0]
-            # Store the original case combinations
-            players = [f"{team} {p.strip()}" for p in row[1:6] if p.strip()]
-            valid_combinations.extend(players)
-            # Store lowercase for matching
-            rosters[team] = [p.lower() for p in players]
-    
-    def find_closest_match(player_name):
-        if pd.isna(player_name) or player_name == '':
-            return player_name
-            
-        player_lower = player_name.lower()
-        best_match = None
-        min_distance = float('inf')
-        
-        # Check against all valid combinations
-        for valid_name in valid_combinations:
-            valid_lower = valid_name.lower()
-            # Calculate Levenshtein distance
-            distance = sum(1 for a, b in zip(player_lower, valid_lower) if a != b)
-            distance += abs(len(player_lower) - len(valid_lower))
-            
-            # Update if this is the best match within margin of error
-            if distance <= 3 and distance < min_distance:
-                min_distance = distance
-                best_match = valid_name
-        
-        return best_match if best_match else player_name
-
-    # Correct player names
-    df['Player 1'] = df['Player 1'].apply(find_closest_match)
-    df['Player 2'] = df['Player 2'].apply(find_closest_match)
-    
-    # Save corrected data to a new file
-    post_validation_path = csv_path.replace('.csv', '_validated.csv')
-    df.to_csv(post_validation_path, index=False)
-    
-    # Also update the original file
-    df.to_csv(csv_path, index=False)
-    
-    print(f"Pre-validation data saved to: {pre_validation_path}")
-    print(f"Post-validation data saved to: {post_validation_path}")
-    print(f"Original file updated: {csv_path}")
-
-# Add this line after other post-processing steps
-validate_and_correct_against_roster(output_csv_filtered)
-
