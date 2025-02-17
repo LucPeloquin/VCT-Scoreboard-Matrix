@@ -45,8 +45,11 @@ print(f"Loaded {len(icon_templates)} icon templates: {icon_templates}")
 last_detected_time = None
 time_countdown = 40
 
+# Add a dictionary to store detections per round
+detections_dict = {}
+
 # Function to detect an image within the static ROI
-def detect_image_in_roi(sct, template_paths, threshold=0.7):
+def detect_image_in_roi(sct, template_paths, round_number, threshold=0.7):
     """
     Detect if any template images exist within the static ROI at any scale.
     """
@@ -71,6 +74,8 @@ def detect_image_in_roi(sct, template_paths, threshold=0.7):
         if max_val >= threshold:
             template_name = os.path.basename(template_path)
             detections.append((template_name, max_loc, max_val))
+            # Store the detection for this round
+            detections_dict[round_number] = template_name
 
     return detections
 
@@ -150,12 +155,18 @@ def detect_time(sct):
     return "00:00"  # Default if no time and no last detected time
 
 def process_csv_with_team_split(csv_path, team1, team2):
+    # Load the roster database with full "Team Player" combinations
+    valid_rosters = load_team_rosters()
+    team1_combinations = valid_rosters.get(team1.lower(), [])
+    team2_combinations = valid_rosters.get(team2.lower(), [])
+
     with open(csv_path, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
         rows = list(reader)
 
     if rows:
-        header = rows[0][:3] + ["Player 2"]
+        # Add new column to header
+        header = rows[0][:3] + ["Player 2", "Template"]
         updated_rows = [header]
 
         for row in rows[1:]:
@@ -186,8 +197,13 @@ def process_csv_with_team_split(csv_path, team1, team2):
                     elif not player2:
                         player2 = f"{team2} {words[i+1]}"
 
+            # Get template name from detections dictionary (assuming it's available in scope)
+            template_name = ""
+            if round_number in detections_dict:
+                template_name = detections_dict[round_number]
+
             if player1 or player2:  # Only add rows where players were found
-                updated_rows.append([round_number, detected_time, player1, player2])
+                updated_rows.append([round_number, detected_time, player1, player2, template_name])
 
     # Write back to the same CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
@@ -263,7 +279,7 @@ with mss() as sct:
         detected_time = detect_time(sct)
 
         # Detect images in the static ROI
-        detections = detect_image_in_roi(sct, icon_templates)
+        detections = detect_image_in_roi(sct, icon_templates, round_number)
         if detections:
             for template_name, location, confidence in detections:
                 print(f"Template {template_name} detected in static ROI at {location} with confidence {confidence:.2f}")
@@ -422,4 +438,18 @@ def validate_and_correct_against_roster(csv_path):
 
 # Add this line after other post-processing steps
 validate_and_correct_against_roster(output_csv_filtered)
+
+def load_team_rosters():
+    """Load team rosters from CSV file and return a dictionary of team-player combinations."""
+    rosters = {}
+    with open('team_rosters.csv', 'r', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip header
+        for row in reader:
+            if row:  # Check if row is not empty
+                team = row[0].lower()
+                # Create full "Team Player" combinations for each valid player
+                players = [f"{row[0]} {p.strip()}" for p in row[1:6] if p.strip()]
+                rosters[team] = players
+    return rosters
 
