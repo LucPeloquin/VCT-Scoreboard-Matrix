@@ -1,0 +1,516 @@
+2025-02-17 18:37:25,344 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:25,350 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:25,351 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:25,351 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:25,356 - DEBUG - Template matching confidence: 0.510
+2025-02-17 18:37:25,356 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.510)
+2025-02-17 18:37:26,067 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:26,074 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:26,074 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:26,074 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:26,080 - DEBUG - Template matching confidence: 0.544
+2025-02-17 18:37:26,080 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.544)
+2025-02-17 18:37:26,829 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:26,836 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:26,836 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:26,836 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:26,841 - DEBUG - Template matching confidence: 0.505
+2025-02-17 18:37:26,841 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.505)
+2025-02-17 18:37:27,578 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:27,584 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:27,584 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:27,584 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:27,588 - DEBUG - Template matching confidence: 0.484
+2025-02-17 18:37:27,588 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.484)
+2025-02-17 18:37:28,359 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:28,364 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:28,364 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:28,364 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:28,368 - DEBUG - Template matching confidence: 0.480
+2025-02-17 18:37:28,368 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.480)
+2025-02-17 18:37:29,132 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:29,137 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:29,137 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:29,137 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:29,141 - DEBUG - Template matching confidence: 0.494
+2025-02-17 18:37:29,141 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.494)
+2025-02-17 18:37:29,911 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:29,917 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:29,917 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:29,917 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:29,922 - DEBUG - Template matching confidence: 0.495
+2025-02-17 18:37:29,922 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.495)
+2025-02-17 18:37:30,676 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:30,682 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:30,682 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:30,682 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:30,686 - DEBUG - Template matching confidence: 0.479
+2025-02-17 18:37:30,686 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.479)
+2025-02-17 18:37:31,446 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:31,451 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:31,451 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:31,451 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:31,455 - DEBUG - Template matching confidence: 0.475
+2025-02-17 18:37:31,455 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.475)
+2025-02-17 18:37:32,208 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:32,215 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:32,215 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:32,216 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:32,220 - DEBUG - Template matching confidence: 0.476
+2025-02-17 18:37:32,220 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.476)
+2025-02-17 18:37:32,583 - INFO - Processing time per frame: 0.543s
+2025-02-17 18:37:32,583 - INFO - Capture interval: 0.2s
+2025-02-17 18:37:32,583 - INFO - Frames processed: 10
+2025-02-17 18:37:32,954 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:32,959 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:32,959 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:32,959 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:32,963 - DEBUG - Template matching confidence: 0.478
+2025-02-17 18:37:32,964 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.478)
+2025-02-17 18:37:33,646 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:33,650 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:33,650 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:33,650 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:33,655 - DEBUG - Template matching confidence: 0.502
+2025-02-17 18:37:33,655 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.502)
+2025-02-17 18:37:34,336 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:34,342 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:34,342 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:34,342 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:34,347 - DEBUG - Template matching confidence: 0.430
+2025-02-17 18:37:34,347 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.430)
+2025-02-17 18:37:35,032 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:35,039 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:35,039 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:35,039 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:35,043 - DEBUG - Template matching confidence: 0.509
+2025-02-17 18:37:35,043 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.509)
+2025-02-17 18:37:35,740 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:35,744 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:35,745 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:35,745 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:35,749 - DEBUG - Template matching confidence: 0.481
+2025-02-17 18:37:35,749 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.481)
+2025-02-17 18:37:36,468 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:36,473 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:36,473 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:36,473 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:36,476 - DEBUG - Template matching confidence: 0.479
+2025-02-17 18:37:36,476 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.479)
+2025-02-17 18:37:37,267 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:37,273 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:37,273 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:37,273 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:37,278 - DEBUG - Template matching confidence: 0.481
+2025-02-17 18:37:37,278 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.481)
+2025-02-17 18:37:38,056 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:38,060 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:38,060 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:38,060 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:38,063 - DEBUG - Template matching confidence: 0.578
+2025-02-17 18:37:38,063 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.578)
+2025-02-17 18:37:38,883 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:38,886 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:38,886 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:38,886 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:38,890 - DEBUG - Template matching confidence: 0.556
+2025-02-17 18:37:38,890 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.556)
+2025-02-17 18:37:39,667 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:39,670 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:39,671 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:39,671 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:39,675 - DEBUG - Template matching confidence: 0.517
+2025-02-17 18:37:39,675 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.517)
+2025-02-17 18:37:40,077 - INFO - Processing time per frame: 0.580s
+2025-02-17 18:37:40,077 - INFO - Capture interval: 0.2s
+2025-02-17 18:37:40,077 - INFO - Frames processed: 20
+2025-02-17 18:37:40,444 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:40,448 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:40,448 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:40,448 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:40,452 - DEBUG - Template matching confidence: 0.559
+2025-02-17 18:37:40,454 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.559)
+2025-02-17 18:37:41,242 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:41,247 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:41,247 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:41,247 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:41,253 - DEBUG - Template matching confidence: 0.428
+2025-02-17 18:37:41,253 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.428)
+2025-02-17 18:37:41,941 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:41,944 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:41,944 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:41,944 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:41,948 - DEBUG - Template matching confidence: 0.379
+2025-02-17 18:37:41,949 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.379)
+2025-02-17 18:37:42,644 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:42,648 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:42,648 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:42,648 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:42,652 - DEBUG - Template matching confidence: 0.574
+2025-02-17 18:37:42,652 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.574)
+2025-02-17 18:37:43,342 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:43,348 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:43,348 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:43,348 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:43,352 - DEBUG - Template matching confidence: 0.482
+2025-02-17 18:37:43,352 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.482)
+2025-02-17 18:37:44,054 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:44,059 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:44,059 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:44,059 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:44,064 - DEBUG - Template matching confidence: 0.514
+2025-02-17 18:37:44,064 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.514)
+2025-02-17 18:37:44,763 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:44,769 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:44,769 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:44,769 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:44,774 - DEBUG - Template matching confidence: 0.454
+2025-02-17 18:37:44,774 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.454)
+2025-02-17 18:37:45,457 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:45,462 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:45,462 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:45,462 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:45,466 - DEBUG - Template matching confidence: 0.472
+2025-02-17 18:37:45,466 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.472)
+2025-02-17 18:37:46,167 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:46,172 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:46,172 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:46,172 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:46,178 - DEBUG - Template matching confidence: 0.513
+2025-02-17 18:37:46,178 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.513)
+2025-02-17 18:37:46,874 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:46,878 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:46,878 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:46,878 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:46,883 - DEBUG - Template matching confidence: 0.477
+2025-02-17 18:37:46,883 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.477)
+2025-02-17 18:37:47,206 - INFO - Processing time per frame: 0.502s
+2025-02-17 18:37:47,206 - INFO - Capture interval: 0.2s
+2025-02-17 18:37:47,206 - INFO - Frames processed: 30
+2025-02-17 18:37:47,569 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:47,572 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:47,572 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:47,572 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:47,577 - DEBUG - Template matching confidence: 0.482
+2025-02-17 18:37:47,577 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.482)
+2025-02-17 18:37:48,258 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:48,261 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:48,261 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:48,261 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:48,266 - DEBUG - Template matching confidence: 0.540
+2025-02-17 18:37:48,267 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.540)
+2025-02-17 18:37:48,961 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:48,966 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:48,966 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:48,967 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:48,971 - DEBUG - Template matching confidence: 0.553
+2025-02-17 18:37:48,971 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.553)
+2025-02-17 18:37:49,655 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:49,661 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:49,661 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:49,661 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:49,666 - DEBUG - Template matching confidence: 0.542
+2025-02-17 18:37:49,666 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.542)
+2025-02-17 18:37:50,417 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:50,421 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:50,422 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:50,422 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:50,426 - DEBUG - Template matching confidence: 0.591
+2025-02-17 18:37:50,427 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.591)
+2025-02-17 18:37:51,117 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:51,121 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:51,121 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:51,121 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:51,125 - DEBUG - Template matching confidence: 0.522
+2025-02-17 18:37:51,125 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.522)
+2025-02-17 18:37:51,818 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:51,822 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:51,822 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:51,822 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:51,828 - DEBUG - Template matching confidence: 0.518
+2025-02-17 18:37:51,828 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.518)
+2025-02-17 18:37:52,537 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:52,542 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:52,542 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:52,542 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:52,547 - DEBUG - Template matching confidence: 0.525
+2025-02-17 18:37:52,547 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.525)
+2025-02-17 18:37:53,306 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:53,311 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:53,311 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:53,311 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:53,315 - DEBUG - Template matching confidence: 0.534
+2025-02-17 18:37:53,315 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.534)
+2025-02-17 18:37:54,014 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:54,020 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:54,020 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:54,020 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:54,024 - DEBUG - Template matching confidence: 0.554
+2025-02-17 18:37:54,024 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.554)
+2025-02-17 18:37:54,376 - INFO - Processing time per frame: 0.533s
+2025-02-17 18:37:54,377 - INFO - Capture interval: 0.2s
+2025-02-17 18:37:54,377 - INFO - Frames processed: 40
+2025-02-17 18:37:54,758 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:37:54,762 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:37:54,762 - DEBUG - Using scale: 0.19
+2025-02-17 18:37:54,762 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:37:54,766 - DEBUG - Template matching confidence: 0.593
+2025-02-17 18:37:54,766 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.593)
+2025-02-17 18:38:40,715 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:40,720 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:40,720 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:40,720 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:40,726 - DEBUG - Template matching confidence: 0.543
+2025-02-17 18:38:40,726 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.543)
+2025-02-17 18:38:41,442 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:41,447 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:41,447 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:41,447 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:41,451 - DEBUG - Template matching confidence: 0.483
+2025-02-17 18:38:41,451 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.483)
+2025-02-17 18:38:42,128 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:42,133 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:42,133 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:42,133 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:42,138 - DEBUG - Template matching confidence: 0.534
+2025-02-17 18:38:42,138 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.534)
+2025-02-17 18:38:42,858 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:42,863 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:42,863 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:42,864 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:42,868 - DEBUG - Template matching confidence: 0.483
+2025-02-17 18:38:42,868 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.483)
+2025-02-17 18:38:43,620 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:43,625 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:43,625 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:43,625 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:43,629 - DEBUG - Template matching confidence: 0.487
+2025-02-17 18:38:43,629 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.487)
+2025-02-17 18:38:44,400 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:44,405 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:44,406 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:44,406 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:44,410 - DEBUG - Template matching confidence: 0.486
+2025-02-17 18:38:44,410 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.486)
+2025-02-17 18:38:45,176 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:45,180 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:45,180 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:45,180 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:45,186 - DEBUG - Template matching confidence: 0.505
+2025-02-17 18:38:45,186 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.505)
+2025-02-17 18:38:45,951 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:45,958 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:45,958 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:45,958 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:45,964 - DEBUG - Template matching confidence: 0.479
+2025-02-17 18:38:45,964 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.479)
+2025-02-17 18:38:46,729 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:46,734 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:46,734 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:46,734 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:46,739 - DEBUG - Template matching confidence: 0.477
+2025-02-17 18:38:46,739 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.477)
+2025-02-17 18:38:47,463 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:47,470 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:47,470 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:47,471 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:47,479 - DEBUG - Template matching confidence: 0.477
+2025-02-17 18:38:47,479 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.477)
+2025-02-17 18:38:47,826 - INFO - Processing time per frame: 0.535s
+2025-02-17 18:38:47,826 - INFO - Capture interval: 0.2s
+2025-02-17 18:38:47,826 - INFO - Frames processed: 10
+2025-02-17 18:38:48,191 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:48,197 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:48,197 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:48,197 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:48,202 - DEBUG - Template matching confidence: 0.491
+2025-02-17 18:38:48,203 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.491)
+2025-02-17 18:38:48,872 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:48,878 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:48,878 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:48,878 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:48,883 - DEBUG - Template matching confidence: 0.456
+2025-02-17 18:38:48,883 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.456)
+2025-02-17 18:38:49,554 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:49,558 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:49,558 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:49,558 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:49,562 - DEBUG - Template matching confidence: 0.514
+2025-02-17 18:38:49,562 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.514)
+2025-02-17 18:38:50,248 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:50,252 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:50,252 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:50,252 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:50,257 - DEBUG - Template matching confidence: 0.496
+2025-02-17 18:38:50,257 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.496)
+2025-02-17 18:38:50,965 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:50,970 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:50,970 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:50,970 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:50,974 - DEBUG - Template matching confidence: 0.530
+2025-02-17 18:38:50,974 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.530)
+2025-02-17 18:38:51,762 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:51,766 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:51,766 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:51,767 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:51,770 - DEBUG - Template matching confidence: 0.488
+2025-02-17 18:38:51,771 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.488)
+2025-02-17 18:38:52,566 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:52,569 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:52,569 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:52,569 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:52,573 - DEBUG - Template matching confidence: 0.492
+2025-02-17 18:38:52,573 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.492)
+2025-02-17 18:38:53,383 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:53,388 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:53,388 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:53,388 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:53,394 - DEBUG - Template matching confidence: 0.580
+2025-02-17 18:38:53,394 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.580)
+2025-02-17 18:38:54,179 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:54,186 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:54,186 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:54,186 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:54,190 - DEBUG - Template matching confidence: 0.583
+2025-02-17 18:38:54,190 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.583)
+2025-02-17 18:38:54,989 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:54,993 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:54,993 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:54,993 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:54,998 - DEBUG - Template matching confidence: 0.538
+2025-02-17 18:38:54,998 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.538)
+2025-02-17 18:38:55,419 - INFO - Processing time per frame: 0.610s
+2025-02-17 18:38:55,419 - INFO - Capture interval: 0.2s
+2025-02-17 18:38:55,419 - INFO - Frames processed: 20
+2025-02-17 18:38:55,793 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:55,797 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:55,797 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:55,797 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:55,803 - DEBUG - Template matching confidence: 0.478
+2025-02-17 18:38:55,803 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.478)
+2025-02-17 18:38:56,548 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:56,553 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:56,553 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:56,553 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:56,558 - DEBUG - Template matching confidence: 0.438
+2025-02-17 18:38:56,558 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.438)
+2025-02-17 18:38:57,247 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:57,253 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:57,253 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:57,253 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:57,257 - DEBUG - Template matching confidence: 0.491
+2025-02-17 18:38:57,257 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.491)
+2025-02-17 18:38:57,964 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:57,969 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:57,969 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:57,969 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:57,974 - DEBUG - Template matching confidence: 0.490
+2025-02-17 18:38:57,974 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.490)
+2025-02-17 18:38:58,667 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:58,672 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:58,672 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:58,672 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:58,677 - DEBUG - Template matching confidence: 0.432
+2025-02-17 18:38:58,677 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.432)
+2025-02-17 18:38:59,387 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:38:59,392 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:38:59,392 - DEBUG - Using scale: 0.19
+2025-02-17 18:38:59,392 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:38:59,396 - DEBUG - Template matching confidence: 0.453
+2025-02-17 18:38:59,396 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.453)
+2025-02-17 18:39:00,110 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:00,114 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:00,114 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:00,114 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:00,118 - DEBUG - Template matching confidence: 0.499
+2025-02-17 18:39:00,118 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.499)
+2025-02-17 18:39:00,804 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:00,808 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:00,808 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:00,809 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:00,814 - DEBUG - Template matching confidence: 0.457
+2025-02-17 18:39:00,814 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.457)
+2025-02-17 18:39:01,509 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:01,514 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:01,514 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:01,514 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:01,518 - DEBUG - Template matching confidence: 0.469
+2025-02-17 18:39:01,518 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.469)
+2025-02-17 18:39:02,214 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:02,219 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:02,219 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:02,219 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:02,224 - DEBUG - Template matching confidence: 0.508
+2025-02-17 18:39:02,224 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.508)
+2025-02-17 18:39:02,545 - INFO - Processing time per frame: 0.501s
+2025-02-17 18:39:02,545 - INFO - Capture interval: 0.2s
+2025-02-17 18:39:02,545 - INFO - Frames processed: 30
+2025-02-17 18:39:02,921 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:02,927 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:02,927 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:02,927 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:02,931 - DEBUG - Template matching confidence: 0.506
+2025-02-17 18:39:02,931 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.506)
+2025-02-17 18:39:03,624 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:03,627 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:03,628 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:03,628 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:03,632 - DEBUG - Template matching confidence: 0.546
+2025-02-17 18:39:03,632 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.546)
+2025-02-17 18:39:04,317 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:04,322 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:04,322 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:04,322 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:04,326 - DEBUG - Template matching confidence: 0.544
+2025-02-17 18:39:04,326 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.544)
+2025-02-17 18:39:05,184 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:05,189 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:05,189 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:05,189 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:05,194 - DEBUG - Template matching confidence: 0.554
+2025-02-17 18:39:05,194 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.554)
+2025-02-17 18:39:05,887 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:05,891 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:05,891 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:05,891 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:05,896 - DEBUG - Template matching confidence: 0.527
+2025-02-17 18:39:05,896 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.527)
+2025-02-17 18:39:06,589 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:06,593 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:06,593 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:06,593 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:06,598 - DEBUG - Template matching confidence: 0.543
+2025-02-17 18:39:06,598 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.543)
+2025-02-17 18:39:07,295 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:07,300 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:07,300 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:07,300 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:07,305 - DEBUG - Template matching confidence: 0.525
+2025-02-17 18:39:07,305 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.525)
+2025-02-17 18:39:08,053 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:08,060 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:08,060 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:08,061 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:08,065 - DEBUG - Template matching confidence: 0.534
+2025-02-17 18:39:08,065 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.534)
+2025-02-17 18:39:08,733 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:08,736 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:08,736 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:08,736 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:08,740 - DEBUG - Template matching confidence: 0.554
+2025-02-17 18:39:08,740 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.554)
+2025-02-17 18:39:09,419 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:09,425 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:09,425 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:09,425 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:09,430 - DEBUG - Template matching confidence: 0.535
+2025-02-17 18:39:09,430 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.535)
+2025-02-17 18:39:09,744 - INFO - Processing time per frame: 0.497s
+2025-02-17 18:39:09,744 - INFO - Capture interval: 0.2s
+2025-02-17 18:39:09,744 - INFO - Frames processed: 40
+2025-02-17 18:39:10,157 - DEBUG - Template Vandal_icon.png - Original size: (128, 420)
+2025-02-17 18:39:10,162 - DEBUG - Screen capture size: (248, 645)
+2025-02-17 18:39:10,162 - DEBUG - Using scale: 0.19
+2025-02-17 18:39:10,163 - DEBUG - Resized template size: (25, 81)
+2025-02-17 18:39:10,168 - DEBUG - Template matching confidence: 0.525
+2025-02-17 18:39:10,168 - DEBUG - No match found for Vandal_icon.png (best confidence: 0.525)

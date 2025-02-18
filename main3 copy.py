@@ -10,7 +10,6 @@ import numpy as np
 from collections import defaultdict
 from datetime import datetime, timedelta
 from fuzzywuzzy import fuzz
-import logging
 
 # Set UTF-8 encoding for console
 sys.stdout.reconfigure(encoding='utf-8')
@@ -32,7 +31,7 @@ output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with 
 # Parameters
 capture_interval = 0.2  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = 4  # Run for 1.5 minutes
+duration_minutes = .5  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -41,13 +40,6 @@ reader = easyocr.Reader(['en'], gpu=True, verbose=False)
 # Initialize time tracking
 last_detected_time = None
 time_countdown = 40
-
-# Add logging configuration
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='template_matching.log'
-)
 
 # Function to detect an image within the static ROI
 def detect_image_in_roi(sct, template_path, threshold=0.7):
@@ -179,40 +171,44 @@ def process_csv_with_team_split(csv_path, team1, team2):
         reader = csv.reader(file)
         rows = list(reader)
 
+    # Update header to include the "Player 2" column
     if rows:
-        header = rows[0][:3] + ["Player 2", "Weapon"]  # Include "Weapon" in the header
+        header = rows[0][:3] + ["Player 2"]  # Include "Player 2" in the header
         updated_rows = [header]
 
-        for row in rows[1:]:
-            round_number, detected_time, detected_text, weapon = row  # Unpack all 4 values
+        # Process each row
+        for row in rows[1:]:  # Skip the header row
+            round_number, detected_time, detected_text = row
 
-            # Format detected_time
-            detected_time = re.sub(r'[^\d]', '', detected_time)
-            if len(detected_time) == 4:
+            # Ensure the detected_time is in the format X:XX
+            detected_time = re.sub(r'[^\d]', '', detected_time)  # Remove non-numeric characters
+            if len(detected_time) == 4:  # Format as XX:XX
                 detected_time = f"{detected_time[:2]}:{detected_time[2:]}"
-            elif len(detected_time) == 3:
+            elif len(detected_time) == 3:  # Format as X:XX
                 detected_time = f"{detected_time[0]}:{detected_time[1:]}"
-            elif len(detected_time) == 2:
+            elif len(detected_time) == 2:  # Invalid case, set as default
                 detected_time = f"0:{detected_time}"
 
             words = detected_text.split()
             player1, player2 = "", ""
 
-            # Look for team names and following words
-            for i in range(len(words) - 1):
-                if words[i] == team1:
+            i = 0
+            while i < len(words):
+                if words[i] in (team1, team2):  # Detect team name
                     if not player1:
-                        player1 = f"{team1} {words[i+1]}"
+                        player1 = words[i]
+                        if i + 1 < len(words):
+                            player1 += f" {words[i + 1]},"  # Add a comma after the next word
+                            i += 1
                     elif not player2:
-                        player2 = f"{team1} {words[i+1]}"
-                elif words[i] == team2:
-                    if not player1:
-                        player1 = f"{team2} {words[i+1]}"
-                    elif not player2:
-                        player2 = f"{team2} {words[i+1]}"
+                        player2 = words[i]
+                        if i + 1 < len(words):
+                            player2 += f" {words[i + 1]},"  # Add a comma after the next word
+                            i += 1
+                i += 1
 
-            if player1 or player2:  # Only add rows where players were found
-                updated_rows.append([round_number, detected_time, player1, player2, weapon])
+            # Add processed rows with no extra commas
+            updated_rows.append([round_number, detected_time, player1.strip(","), player2.strip(",")])
 
     # Write back to the same CSV
     with open(csv_path, mode='w', newline='', encoding='utf-8') as file:
@@ -230,7 +226,7 @@ def remove_duplicates(csv_path):
         unique_rows.append(header)  # Add the header to the unique rows
 
         for row in reader:
-            round_number, detected_time, player, player2, weapon = row  # Unpack all 5 values
+            round_number, detected_time, player, player2 = row
 
             # Create a similarity key for players
             player_key = ''.join(sorted(player))  # Sort characters for fuzzy matching
@@ -283,27 +279,25 @@ with mss() as sct:
         # Detect time from the time ROI
         detected_time = detect_time(sct)
 
-        # Get list of icon templates from icons folder
-        icon_templates = [os.path.join("icons", f) for f in os.listdir("icons") if f.endswith(('.png', '.jpg', '.jpeg'))]
-        
-        for template_path in icon_templates:
-            found, location, confidence = detect_image_in_roi(sct, template_path, threshold=0.85)  # Set threshold to 0.8
-            if found:
-                print(f"Template {template_path} detected at {location} with confidence {confidence:.2f}")
-                # Capture a screenshot of the ROI when the template is detected
-                detected_frame = sct.grab(static_roi)
-                detected_image = np.array(detected_frame)
-                screenshot_path = os.path.join('detected_screenshots', f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-                cv2.imwrite(screenshot_path, detected_image)
-                print(f"Screenshot saved for detected template: {screenshot_path}")
-                print("Screenshot saved for detected template.")
+        # Detect image in the static ROI
+        template_path = "Vandal_icon.png"  # Path to the template image
+        found, location, confidence = detect_image_in_roi(sct, template_path)
+        if found:
+            print(f"Template detected at {location} with confidence {confidence:.2f}")
+            # Capture a screenshot of the ROI when the template is detected
+            detected_frame = sct.grab(static_roi)
+            detected_image = np.array(detected_frame)
+            screenshot_path = os.path.join('detected_screenshots', f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+            cv2.imwrite(screenshot_path, detected_image)
+            print(f"Screenshot saved for detected template: {screenshot_path}")
+            print("Screenshot saved for detected template.")
 
-            # Define the static ROI for main text detection
-            roi = {"left": static_roi["left"], "top": static_roi["top"],
-                "width": static_roi["width"], "height": static_roi["height"]}
-            screen = sct.grab(roi)
-            frame = np.array(screen)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+        # Define the static ROI for main text detection
+        roi = {"left": static_roi["left"], "top": static_roi["top"],
+               "width": static_roi["width"], "height": static_roi["height"]}
+        screen = sct.grab(roi)
+        frame = np.array(screen)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
 
         results_static = reader.readtext(frame)
 
@@ -339,26 +333,15 @@ with mss() as sct:
             detected_text_lines.append(" ".join([text[1] for text in line]))
 
         for line in detected_text_lines:
-            # Initialize weapon as empty string
-            detected_weapon = ""
-            
-            # If a template was detected in this frame, use its name without extension
-            for template_path in icon_templates:
-                found, location, confidence = detect_image_in_roi(sct, template_path, threshold=0.8)
-                if found:
-                    detected_weapon = os.path.splitext(os.path.basename(template_path))[0]  # Remove .png extension
-                    break  # Only use the first detected weapon
-            
-            all_text_data.append([frame_count, number1, number2, round_number, detected_time, line, detected_weapon])
+            all_text_data.append([frame_count, number1, number2, round_number, detected_time, line])
 
         frame_count += 1
         time.sleep(capture_interval)
 
-
 # Save all detected text to CSV
 with open(output_csv_all, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    writer.writerow(["Frame Number", "Number 1", "Number 2", "Round", "Time", "Player 1", "Weapon"])
+    writer.writerow(["Frame Number", "Number 1", "Number 2", "Round", "Time", "Player 1"])
     writer.writerows(all_text_data)
 
 # Post-process and save filtered text
@@ -366,17 +349,17 @@ filtered_text_data = []
 seen_lines = set()
 
 for row in all_text_data:
-    _, _, _, round_number, detected_time, text_line, weapon = row  # Added weapon to unpacking
+    _, _, _, round_number, detected_time, text_line = row
     words = text_line.split()
     if words and words[0] in (team1_name, team2_name):  # Check if the line starts with a team name
         if text_line not in seen_lines:
-            filtered_text_data.append([round_number, detected_time, text_line, weapon])  # Added weapon to data
+            filtered_text_data.append([round_number, detected_time, text_line])
             seen_lines.add(text_line)
 
 # Save filtered text to CSV
 with open(output_csv_filtered, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    writer.writerow(["Round", "Time", "Player 1", "Weapon"])  # Added "Weapon" to header
+    writer.writerow(["Round", "Time", "Player 1"])  # Header
     writer.writerows(filtered_text_data)
 
 # Call the function to split teams and update the CSV
