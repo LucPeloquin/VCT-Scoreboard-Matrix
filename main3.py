@@ -32,7 +32,7 @@ output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with 
 # Parameters
 capture_interval = 0.2  # Time interval (in seconds) between captures
 line_tolerance = 15  # Tolerance for grouping words into the same horizontal line
-duration_minutes = 4  # Run for 1.5 minutes
+duration_minutes = .5  # Run for 1.5 minutes
 min_confidence = 0.9  # Minimum confidence for OCR
 
 # Initialize EasyOCR reader
@@ -51,16 +51,6 @@ logging.basicConfig(
 
 # Function to detect an image within the static ROI
 def detect_image_in_roi(sct, template_path, threshold=0.7):
-    """
-    Detect if a template image exists within the static ROI at any scale.
-    :param sct: MSS screenshot object
-    :param template_path: Path to the template image
-    :param threshold: Confidence threshold for detection (default: 0.7)
-    :return: Tuple of (found, location, confidence) where:
-             - found: True if the template is detected, False otherwise
-             - location: (x, y) coordinates of the detected template
-             - confidence: Confidence score of the detection
-    """
     # Load the template image
     template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
     if template is None:
@@ -72,26 +62,23 @@ def detect_image_in_roi(sct, template_path, threshold=0.7):
     screen_image = np.array(screen)
     screen_image = cv2.cvtColor(screen_image, cv2.COLOR_BGRA2GRAY)
 
-    # Use multi-scale template matching
+    # Use a fixed scale for template matching
     found = False
     best_confidence = 0
     best_location = None
 
-    for scale in [81 / template.shape[1]]:
-        resized_template = cv2.resize(template, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
-        if resized_template.shape[0] > screen_image.shape[0] or resized_template.shape[1] > screen_image.shape[1]:
-            break
-
+    # Set the scale factor to resize the template width to 81 pixels
+    scale = 78 / template.shape[1]
+    resized_template = cv2.resize(template, None, fx=scale, fy=scale, interpolation=cv2.INTER_LINEAR)
+    
+    if resized_template.shape[0] <= screen_image.shape[0] and resized_template.shape[1] <= screen_image.shape[1]:
         result = cv2.matchTemplate(screen_image, resized_template, cv2.TM_CCOEFF_NORMED)
         _, max_val, _, max_loc = cv2.minMaxLoc(result)
 
-        if max_val > best_confidence:
-            best_confidence = max_val
-            best_location = max_loc
-
         if max_val >= threshold:
             found = True
-            break
+            best_confidence = max_val
+            best_location = max_loc
 
     if found:
         return True, best_location, best_confidence
@@ -276,6 +263,10 @@ with mss() as sct:
 
     print(f"Starting OCR processing with Team1: {team1_name} and Team2: {team2_name}")
 
+    # Load only Ghost_icon.png
+    template_path = "icons/Ghost_icon.png"
+    print(f"Loaded template: {template_path}")
+
     while datetime.now() < end_time:
         # Detect numbers from the number ROIs
         number1, number2, round_number = detect_numbers(sct)
@@ -283,34 +274,14 @@ with mss() as sct:
         # Detect time from the time ROI
         detected_time = detect_time(sct)
 
-        # Get list of icon templates from icons folder
-        icon_templates = [os.path.join("icons", f) for f in os.listdir("icons") if f.endswith(('.png', '.jpg', '.jpeg'))]
-        
-        for template_path in icon_templates:
-            found, location, confidence = detect_image_in_roi(sct, template_path, threshold=0.85)  # Set threshold to 0.8
-            if found:
-                print(f"Template {template_path} detected at {location} with confidence {confidence:.2f}")
-                # Capture a screenshot of the ROI when the template is detected
-                detected_frame = sct.grab(static_roi)
-                detected_image = np.array(detected_frame)
-                screenshot_path = os.path.join('detected_screenshots', f"detected_template_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-                cv2.imwrite(screenshot_path, detected_image)
-                print(f"Screenshot saved for detected template: {screenshot_path}")
-                print("Screenshot saved for detected template.")
-
-            # Define the static ROI for main text detection
-            roi = {"left": static_roi["left"], "top": static_roi["top"],
-                "width": static_roi["width"], "height": static_roi["height"]}
-            screen = sct.grab(roi)
-            frame = np.array(screen)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
+        # Define the static ROI for main text detection
+        roi = {"left": static_roi["left"], "top": static_roi["top"],
+               "width": static_roi["width"], "height": static_roi["height"]}
+        screen = sct.grab(roi)
+        frame = np.array(screen)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGRA2BGR)
 
         results_static = reader.readtext(frame)
-
-        # Output detected text within the static ROI to the console
-        # if results_static:
-        #     for _, text, _ in results_static:
-        #         print(f"Detected text in static ROI: {text}")
 
         # Group text into horizontal lines
         line_map = defaultdict(list)
@@ -338,16 +309,31 @@ with mss() as sct:
             line = sorted(line, key=lambda item: item[0][0][0])
             detected_text_lines.append(" ".join([text[1] for text in line]))
 
+        # Print the detected lines of text
         for line in detected_text_lines:
+            print(f"Detected line: {line}")
+
             # Initialize weapon as empty string
             detected_weapon = ""
             
-            # If a template was detected in this frame, use its name without extension
-            for template_path in icon_templates:
-                found, location, confidence = detect_image_in_roi(sct, template_path, threshold=0.8)
-                if found:
-                    detected_weapon = os.path.splitext(os.path.basename(template_path))[0]  # Remove .png extension
-                    break  # Only use the first detected weapon
+            # Only check for templates if we have detected text
+            found, location, confidence = detect_image_in_roi(sct, template_path, threshold=0.85)
+                
+            if found:
+                template_name = "Ghost_icon.png"
+                print(f"Text line detected: {line}")
+                print(f"Vandal icon detected at {location} with confidence {confidence:.2f}")
+                
+                # Capture a screenshot of the ROI when the template is detected
+                detected_frame = sct.grab(static_roi)
+                detected_image = np.array(detected_frame)
+                screenshot_path = os.path.join('detected_screenshots', 
+                                                f"detected_vandal_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+                cv2.imwrite(screenshot_path, detected_image)
+                print(f"Screenshot saved: {screenshot_path}")
+                
+                # Store the weapon name without extension
+                detected_weapon = "Vandal"
             
             all_text_data.append([frame_count, number1, number2, round_number, detected_time, line, detected_weapon])
 
