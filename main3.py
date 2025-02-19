@@ -55,7 +55,7 @@ def detect_image_in_roi(sct, template_path, threshold=0.7):
     template = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
     if template is None:
         print(f"Error: Template image not found at {template_path}")
-        return False, None, 0
+        return False, None, 0, None
 
     # Capture the screen within the static ROI
     screen = sct.grab(static_roi)
@@ -81,9 +81,9 @@ def detect_image_in_roi(sct, template_path, threshold=0.7):
             best_location = max_loc
 
     if found:
-        return True, best_location, best_confidence
+        return True, best_location, best_confidence, resized_template.shape[:2]
     else:
-        return False, None, best_confidence
+        return False, None, best_confidence, None
 
 # Detect Team 1 and Team 2 names from the first screenshot
 def detect_team_names(sct):
@@ -242,6 +242,55 @@ def remove_duplicates(csv_path):
     print(f"Removed duplicates from {csv_path} by prioritizing earliest entries for similar players.")
     print(f"Removed duplicates from {csv_path} with leniency for 2 characters difference in Player and 3 in Player 2.")
 
+# Function to overlay the template on the detected location
+def overlay_template_on_screenshot(screenshot, template, location, detected_size):
+    # Convert the screenshot to a format suitable for overlay
+    overlay = screenshot.copy()
+    
+    # Resize the template to match the detected size
+    resized_template = cv2.resize(template, detected_size, interpolation=cv2.INTER_LINEAR)
+    
+    # Get the dimensions of the resized template
+    template_height, template_width = resized_template.shape[:2]
+    
+    # Define the region of interest (ROI) on the overlay
+    x, y = location
+    roi = overlay[y:y+template_height, x:x+template_width]
+    
+    # Ensure the template is in BGR format
+    if resized_template.shape[2] == 4:  # If the template has an alpha channel
+        resized_template = cv2.cvtColor(resized_template, cv2.COLOR_BGRA2BGR)
+    
+    # Create a mask of the template and its inverse mask
+    template_gray = cv2.cvtColor(resized_template, cv2.COLOR_BGR2GRAY)
+    _, mask = cv2.threshold(template_gray, 1, 255, cv2.THRESH_BINARY)
+    mask_inv = cv2.bitwise_not(mask)
+    
+    # Ensure the ROI and mask are compatible
+    if roi.shape[2] == 4:  # If the ROI has an alpha channel
+        roi = cv2.cvtColor(roi, cv2.COLOR_BGRA2BGR)
+    
+    # Ensure the mask is the same size as the ROI
+    mask = cv2.resize(mask, (roi.shape[1], roi.shape[0]))
+    mask_inv = cv2.resize(mask_inv, (roi.shape[1], roi.shape[0]))
+    
+    # Black-out the area of the template in the ROI
+    img_bg = cv2.bitwise_and(roi, roi, mask=mask_inv)
+    
+    # Take only the region of the template from the template image
+    img_fg = cv2.bitwise_and(resized_template, resized_template, mask=mask)
+    
+    # Put the template in the ROI and modify the overlay
+    dst = cv2.add(img_bg, img_fg)
+    
+    # Convert overlay to BGR if it has an alpha channel
+    if overlay.shape[2] == 4:
+        overlay = cv2.cvtColor(overlay, cv2.COLOR_BGRA2BGR)
+    
+    overlay[y:y+template_height, x:x+template_width] = dst
+    
+    return overlay
+
 # Main processing loop
 all_text_data = []
 frame_count = 0
@@ -263,8 +312,8 @@ with mss() as sct:
 
     print(f"Starting OCR processing with Team1: {team1_name} and Team2: {team2_name}")
 
-    # Load only Ghost_icon.png
-    template_path = "icons/Ghost_icon.png"
+    # Load only Ghost.png
+    template_path = "icons/Ghost.png"
     print(f"Loaded template: {template_path}")
 
     while datetime.now() < end_time:
@@ -317,23 +366,31 @@ with mss() as sct:
             detected_weapon = ""
             
             # Only check for templates if we have detected text
-            found, location, confidence = detect_image_in_roi(sct, template_path, threshold=0.85)
+            found, location, confidence, detected_size = detect_image_in_roi(sct, template_path, threshold=0.85)
                 
             if found:
-                template_name = "Ghost_icon.png"
+                template_name = "Ghost.png"
                 print(f"Text line detected: {line}")
-                print(f"Vandal icon detected at {location} with confidence {confidence:.2f}")
+                print(f"Ghost icon detected at {location} with confidence {confidence:.2f}")
                 
                 # Capture a screenshot of the ROI when the template is detected
                 detected_frame = sct.grab(static_roi)
                 detected_image = np.array(detected_frame)
-                screenshot_path = os.path.join('detected_screenshots', 
-                                                f"detected_vandal_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-                cv2.imwrite(screenshot_path, detected_image)
-                print(f"Screenshot saved: {screenshot_path}")
+                
+                # Load the template image
+                template_img = cv2.imread(template_path, cv2.IMREAD_UNCHANGED)
+                
+                # Overlay the template on the screenshot
+                overlay_image = overlay_template_on_screenshot(detected_image, template_img, location, detected_size)
+                
+                # Save the overlay image
+                overlay_screenshot_path = os.path.join('detected_screenshots', 
+                                                       f"overlay_Ghost_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+                cv2.imwrite(overlay_screenshot_path, overlay_image)
+                print(f"Overlay screenshot saved: {overlay_screenshot_path}")
                 
                 # Store the weapon name without extension
-                detected_weapon = "Vandal"
+                detected_weapon = "Ghost"
             
             all_text_data.append([frame_count, number1, number2, round_number, detected_time, line, detected_weapon])
 

@@ -3,7 +3,7 @@ from PIL import Image
 import cv2
 import numpy as np
 
-def convert_to_white_silhouette(input_dir, output_dir, white_intensity=255, inpaint_radius=50):
+def convert_to_white_silhouette(input_dir, output_dir, white_intensity=255, inpaint_radius=5):
     """
     Convert grayscale PNG images to white silhouettes with adjustable intensity and maintain transparency.
 
@@ -48,17 +48,27 @@ def convert_to_white_silhouette(input_dir, output_dir, white_intensity=255, inpa
                 # Create a mask for inpainting
                 _, mask = cv2.threshold(gray, 254, 255, cv2.THRESH_BINARY_INV)
 
-                # Save or display the mask for verification
-                mask_output_path = os.path.join(output_dir, f"mask_{filename}")
-                cv2.imwrite(mask_output_path, mask)
-                print(f"Mask saved: {mask_output_path}")
-
                 # Inpaint the image with a higher radius
                 inpainted = cv2.inpaint(bgr_img, mask, inpaintRadius=inpaint_radius, flags=cv2.INPAINT_TELEA)
+
+                # Edge detection
+                edges = cv2.Canny(gray, 100, 200)
+
+                # Dilate edges to make them more visible
+                kernel = np.ones((3, 3), np.uint8)
+                dilated_edges = cv2.dilate(edges, kernel, iterations=1)
+
+                # Create a red outline
+                outline = np.zeros_like(cv_img)
+                outline[:, :, 0] = dilated_edges  # Red channel
+                outline[:, :, 3] = dilated_edges  # Alpha channel
 
                 # Combine the inpainted image with the original alpha channel
                 b, g, r, a = cv2.split(cv_img)
                 final_img = cv2.merge((inpainted[:, :, 0], inpainted[:, :, 1], inpainted[:, :, 2], a))
+
+                # Overlay the red outline
+                final_img = cv2.addWeighted(final_img, 1, outline, 1, 0)
 
                 # Save the new image
                 output_path = os.path.join(output_dir, filename)
@@ -69,5 +79,5 @@ if __name__ == "__main__":
     input_directory = "icons_og"  # Replace with your input directory path
     output_directory = "icons"  # Replace with your output directory path
     white_intensity = 255  # Adjust this value to fine-tune the white intensity
-    inpaint_radius = 50  # Increase this value to enhance the inpainting effect
-    convert_to_white_silhouette(input_directory, output_directory, white_intensity, inpaint_radius) 
+    inpaint_radius = 5  # Increase this value to enhance the inpainting effect
+    convert_to_white_silhouette(input_directory, output_directory, white_intensity, inpaint_radius)
