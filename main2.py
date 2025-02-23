@@ -25,6 +25,8 @@ number1_roi = {"left": 791, "top": 1, "width": 886 - 791, "height": 66 - 1}
 number2_roi = {"left": 1030, "top": 3, "width": 1121 - 1030, "height": 69 - 3}
 time_roi = {"left": 909, "top": 19, "width": 1009 - 909, "height": 74 - 19}
 
+test_code = 1
+print("Stop gap for research!")
 # Paths
 output_csv_all = 'detected_text_all.csv'  # Output CSV for all detected text
 output_csv_filtered = 'filtered_text.csv'  # Output CSV for filtered lines with team names
