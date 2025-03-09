@@ -12,7 +12,48 @@ This project performs real-time OCR (Optical Character Recognition) and object d
 - **Automated Screenshot Capture**: Takes screenshots when specific templates are detected
 - **Data Export**: Saves all detected information to CSV files for further analysis
 
-Currently updating logic to work for all weapons.
+## Requirements
+- Python 3.x
+- OpenCV
+- EasyOCR
+- NumPy
+- MSS (screen capture)
+- FuzzyWuzzy (for text similarity matching)
+
+## Installation
+To install all required dependencies, run:
+
+```
+pip install -r requirements.txt
+```
+
+This will install all the necessary packages listed in the requirements.txt file.
+
+## Configuration
+The script uses predefined Regions of Interest (ROIs) for different UI elements:
+- Team name areas
+- Score display areas
+- Round timer
+- Kill feed area
+
+## Output Files
+- `detected_text_all.csv`: Contains all detected text from the screen
+- `filtered_text.csv`: Contains filtered text with team and player information
+- `detected_screenshots/`: Directory containing screenshots of detected templates
+
+## Usage
+The current working version is `main3 copy.py`. It is messy, but its a WIP. Run the script to start capturing and analyzing the VALORANT UI:
+
+```
+python "main3 copy.py"
+```
+
+The script will run for the configured duration (default: 0.5 minutes) and generate CSV files with the captured data.
+
+## How It Works
+1. Detects team names at startup
+2. Continuously captures screenshots at defined intervals
+3. Performs OCR on specific regions to extract text information
 4. Uses template matching to detect weapon icons
 5. Processes and filters the data to extract meaningful information
 6. Exports the data to CSV files for analysis
